@@ -51,16 +51,17 @@ router.post('/register', async (req, res) => {
 });
 
 // Route to delete user
-router.delete('/delete', async (req, res) => {
+router.delete('/delete', authenticateToken, async (req, res) => {
 	try {
+		console.log(req.body)
 		// Get user data
-		const user = req.body.user.data.user;
+		const user = req.body;
 		// Delete user
 		const result = await deleteUser(user.email);
 
 		// Sent status to client
 		if (result.status) {
-			res.status(201).json({ message: result.message, status: result.status });
+			res.status(200).json({ message: result.message, status: result.status });
 		} else {
 			res.status(400).json({ message: result.message, status: result.status });
 		}

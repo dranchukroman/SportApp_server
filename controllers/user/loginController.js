@@ -14,8 +14,8 @@ export async function loginUser(email, password) {
 			// Generate JWT
 			const token = jwt.sign(
 				{ id: loginResult.data.user_id, email },
-				// SECRET_KEY,
-				// { expiresIn: '1h' } // Token time life
+				SECRET_KEY,
+				{ expiresIn: '3 days' } // Token time life
 			);
 
 			// Return status with token

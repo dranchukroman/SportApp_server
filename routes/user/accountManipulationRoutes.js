@@ -53,7 +53,6 @@ router.post('/register', async (req, res) => {
 // Route to delete user
 router.delete('/delete', authenticateToken, async (req, res) => {
 	try {
-		console.log(req.body)
 		// Get user data
 		const user = req.body;
 		// Delete user

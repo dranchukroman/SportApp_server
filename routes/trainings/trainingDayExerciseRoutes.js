@@ -1,11 +1,13 @@
 import express from "express";
 import { addExerciseToTrainingDay, deleteExercisesInDay, getExercisesInDay, updateExercisesInDay } from "../../controllers/trainings/trainingDayExerciseController.js";
 
+import { authenticateToken } from '../../middleware/authenticateToken.js'; 
+
 const router = express.Router();
 
-router.get('/getDayExercise', async (req, res) => {
+router.get('/getDayExercise', authenticateToken, async (req, res) => {
     try {
-        const { day_id } = req.body;
+        const { day_id } = req.query;
 
         // Get exercise in training day
         const result = await getExercisesInDay(day_id);

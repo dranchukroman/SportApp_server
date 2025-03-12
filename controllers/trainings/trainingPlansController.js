@@ -53,9 +53,9 @@ export async function addNewTrainingPlan(email, name, description, days_per_week
         if(!userData.data.user_id || 
             !name ||
             !description ||
-            !days_per_week ||
-            !thumbnail_image ||
-            !is_current_plan
+            !days_per_week
+            // !thumbnail_image ||
+            // !is_current_plan
         ) {
             console.log(`Error while getting data for new training plan for ${email}`);
             return {
@@ -71,8 +71,9 @@ export async function addNewTrainingPlan(email, name, description, days_per_week
         const result = await TrainingPlans.addNewTrainingPlan(userData.data.user_id, name, description, days_per_week, thumbnail_image, is_current_plan)
 
         return {
-            status: !!result,
-            message: !!result 
+            status: result != '',
+            planId: result,
+            message: result != ''
                 ? `Training plan for ${email} has been created`
                 : `Training plan for ${email} has not been created for some reason`
         }

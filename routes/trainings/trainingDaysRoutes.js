@@ -1,11 +1,22 @@
 import express from "express";
 import { addTrainiDayToTrainingPlan, deleteTrainingDay, getAllTrainingDays, updateTrainignDay } from "../../controllers/trainings/trainingDaysController.js";
 
+import { authenticateToken } from '../../middleware/authenticateToken.js'; 
+
 const router = express.Router();
 
-router.get('/getTrainingDays', async (req, res) => {
+router.get('/getTrainingDays', authenticateToken, async (req, res) => {
     try {
-        const { trainingPlanId } = req.body;
+		const { email } = req.user;
+
+		if(!email){
+			console.log('Cant get email from token');
+			res.status(403).json({ message: 'Wrong token'})
+		}
+
+        const { trainingPlanId } = req.query;
+
+		
 
         // Get training days
         const result = await getAllTrainingDays(trainingPlanId);
@@ -31,8 +42,15 @@ router.get('/getTrainingDays', async (req, res) => {
     }
 })
 
-router.post('/addTrainingDay', async (req, res) => {
+router.post('/addTrainingDay', authenticateToken, async (req, res) => {
     try {
+		const { email } = req.user;
+
+		if(!email){
+			console.log('Cant get email from token');
+			res.status(403).json({ message: 'Wrong token'})
+		}
+
 		const { trainingPlanId, dayName, dayDescription } = req.body;
         
 		const result = await addTrainiDayToTrainingPlan(trainingPlanId, dayName, dayDescription);
@@ -83,8 +101,15 @@ router.put('/updateTrainingDays', async (req, res) => {
     }
 })
 
-router.delete('/deleteTrainingDays', async (req, res) => {
+router.delete('/deleteTrainingDays', authenticateToken, async (req, res) => {
     try {
+		const { email } = req.user;
+
+		if(!email){
+			console.log('Cant get email from token');
+			res.status(403).json({ message: 'Wrong token'})
+		}
+
 		const { day_id } = req.body;
         
 		const result = await deleteTrainingDay(day_id);

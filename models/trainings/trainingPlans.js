@@ -11,7 +11,8 @@ class TrainingPlans {
     try {
         const resutl = await db.query(`
             INSERT INTO training_plans (user_id, name, description, days_per_week, thumbnail_image, is_current_plan) 
-                VALUES ($1, $2, $3, $4, $5, $6);
+                VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING plan_id;
         `, [
             user_id, 
             name, 
@@ -21,7 +22,7 @@ class TrainingPlans {
             is_current_plan
         ]);
 
-        return !!resutl; 
+        return resutl.rows[0].plan_id; 
     } catch (error) {
         console.log(`Error while adding new training plan: `, error);
         return false; 

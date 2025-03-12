@@ -1,13 +1,16 @@
 import express from 'express';
 import { getAllTrainingPlans, addNewTrainingPlan, deleteTrainingPlan, updateTrainingPlan } from '../../controllers/trainings/trainingPlansController.js';
 
+import { authenticateToken } from '../../middleware/authenticateToken.js'; 
+
+
 const router = express.Router();
 
 // Route to get training plans
-router.get('/trainingPlans', async (req, res) => {
+router.get('/trainingPlans', authenticateToken, async (req, res) => {
     try {
         // Get data from query parameters
-        const { email } = req.query;
+        const { email } = req.user;
 
         // Validate email
         if (!email) {
@@ -42,11 +45,12 @@ router.get('/trainingPlans', async (req, res) => {
     }
 });
 
-router.post('/addTrainingPlan', async (req, res) => {
+router.post('/addTrainingPlan', authenticateToken, async (req, res) => {
     try {
         // Get data from body
+        const { email } = req.user;
+
         const { 
-            email, 
             name, 
             description, 
             days_per_week, 
@@ -73,7 +77,7 @@ router.post('/addTrainingPlan', async (req, res) => {
         if (addingNewPlan.status) {
             console.log(addingNewPlan.message);
             res.status(200).json(
-                { message: addingNewPlan.message }
+                { message: addingNewPlan.message, planId: addingNewPlan.planId }
             );
         } else {
             console.log(`Can't create training plans for ${email}`);
@@ -87,9 +91,10 @@ router.post('/addTrainingPlan', async (req, res) => {
     }
 });
 
-router.delete('/deleteTrainingPlan', async (req, res) => {
+router.delete('/deleteTrainingPlan', authenticateToken, async (req, res) => {
     try {
-        const { email, trainingPlanId } = req.body;
+        const { email } = req.user
+        const { trainingPlanId } = req.body;
 
         // Validate input
         if (!email || !trainingPlanId) {

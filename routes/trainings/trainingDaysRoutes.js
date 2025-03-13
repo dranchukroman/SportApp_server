@@ -103,12 +103,6 @@ router.put('/updateTrainingDays', async (req, res) => {
 
 router.delete('/deleteTrainingDays', authenticateToken, async (req, res) => {
     try {
-		const { email } = req.user;
-
-		if(!email){
-			console.log('Cant get email from token');
-			res.status(403).json({ message: 'Wrong token'})
-		}
 
 		const { day_id } = req.body;
         

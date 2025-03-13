@@ -7,11 +7,11 @@ static async connect(){
     }
   }
 
-  static async addExerciseToDay(day_id, exercise_id, muscle_group, rest_time, sets, reps, weight){
+  static async addExerciseToDay(day_id, exercise_id, muscle_group, description, rest_time, sets, reps, weight){
     try {
       const result = await db.query(`
-        INSERT INTO day_exercises (day_id, exercise_id, muscle_group, rest_time, sets, reps, weight) 
-          VALUES ($1, $2, $3, $4, $5, $6, $7);
+        INSERT INTO day_exercises (day_id, exercise_id, muscle_group, rest_time, sets, reps, weight, description) 
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
       `, [
         day_id,
         exercise_id, 
@@ -19,7 +19,8 @@ static async connect(){
         rest_time, 
         sets, 
         reps, 
-        weight
+        weight,
+        description
       ]);
 
       return result.rowCount > 0;
@@ -32,7 +33,10 @@ static async connect(){
   static async getAllExericsesInDay(day_id){
     try {
       const result = await db.query(`
-        SELECT * FROM day_exercises WHERE day_id = $1;  
+        SELECT de.*, el.name AS exercise_name
+        FROM day_exercises de
+        JOIN exercise_library el ON de.exercise_id = el.exercise_id
+        WHERE de.day_id = $1;
       `, [day_id]);
 
       return result.rows

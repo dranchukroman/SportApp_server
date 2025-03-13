@@ -32,12 +32,14 @@ router.get('/getDayExercise', authenticateToken, async (req, res) => {
     }
 })
 
-router.post('/addDayExercise', async (req, res) => {
+router.post('/addDayExercise', authenticateToken, async (req, res) => {
     try {
-        const {day_id, exercise_id, muscle_group, rest_time, sets, reps, weight} = req.body;
+        const {day_id, exercise_id, muscle_group, description, rest_time, sets, reps, weight} = req.body;
 
-		const result = await addExerciseToTrainingDay(day_id, exercise_id, muscle_group, rest_time, sets, reps, weight);
-
+		const result = await addExerciseToTrainingDay(day_id, exercise_id, muscle_group, description, rest_time, sets, reps, weight);
+		// console.log(' day_id: ' + day_id + ' exercise_id: ' + exercise_id + ' muscle_group: ' + muscle_group + ' description: ' + description + ' rest_time: ' + rest_time + ' sets: ' + sets + ' reps: ' + reps + ' weight: ' + weight);
+		// const result = {status: true};
+		
 		if(result.status){
 			console.log(`Data for exersise in training day: ${day_id} has been added successfully`);
 			res.status(201).json({
@@ -84,7 +86,7 @@ router.put('/updateDayExercise', async (req, res) => {
     }
 })
 
-router.delete('/deleteDayExercise', async (req, res) => {
+router.delete('/deleteDayExercise', authenticateToken, async (req, res) => {
     try {
 		const { day_exercise_id } = req.body;
 

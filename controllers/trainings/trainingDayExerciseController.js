@@ -19,9 +19,9 @@ export async function getExercisesInDay(day_id){
     }
 }
 
-export async function addExerciseToTrainingDay(day_id, exercise_id, muscle_group, rest_time, sets, reps, weight){
+export async function addExerciseToTrainingDay(day_id, exercise_id, muscle_group, description, rest_time, sets, reps, weight){
     try {
-        const result = await DayExercises.addExerciseToDay(day_id, exercise_id, muscle_group, rest_time, sets, reps, weight);
+        const result = await DayExercises.addExerciseToDay(day_id, exercise_id, muscle_group, description, rest_time, sets, reps, weight);
 
         return {
             status: !!result,

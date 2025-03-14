@@ -13,16 +13,28 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT;
 
-
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(express.json());
+
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: [
+    "http://localhost:3000", // локальний сервер для розробки
+    "http://192.168.0.106:3000", // локальна IP-адреса для розробки
+    "https://sportappclient-production.up.railway.app" // адреса вашого клієнта на Railway
+  ], // Дозволені домени
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
   allowedHeaders: ["Authorization", "Content-Type"]
 }));
+
+// Logging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  // console.log('Headers:', req.headers);
+  next();
+});
 
 // Routes
 app.use('/api', loginRoutes);
@@ -31,7 +43,7 @@ app.use('/api', trainingDaysRoutes);
 app.use('/api', exercisesInDay);
 app.use('/api', exerciseLibrary);
 
-
-app.listen(PORT, () => {
+// Listen for all requests in local network
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });

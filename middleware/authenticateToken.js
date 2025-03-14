@@ -12,8 +12,6 @@ export function authenticateToken(req, res, next) {
     return res.status(401).json({ message: 'Access token is required' });
   }
 
-  console.log(SECRET_KEY);
-
   jwt.verify(token, SECRET_KEY, (err, user) => {
     if (err) {
       console.log(err);

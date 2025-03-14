@@ -9,8 +9,6 @@ router.get('/trainingPlans', authenticateToken,  async (req, res) => {
     try {
         const { email } = req.user;
 
-        console.log(email);
-
         const trainingPlans = await getAllTrainingPlans(email);
         
         if (trainingPlans.status) {

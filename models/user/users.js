@@ -64,7 +64,7 @@ class Users {
 		try {
 			// Making request to db
 			const result = await db.query(`
-				SELECT email, password FROM users 
+				SELECT email, password, user_id FROM users 
 					WHERE email = $1;
 				`, [email]
 			);

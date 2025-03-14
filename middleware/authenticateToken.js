@@ -19,6 +19,8 @@ export function authenticateToken(req, res, next) {
     }
 
     req.user = user;
+
+    console.log(`[${new Date().toISOString()}] User: ${user.email} (ID: ${user.id}) accessed ${req.method} ${req.originalUrl}`);
     next();
   });
 }

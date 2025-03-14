@@ -48,7 +48,7 @@ router.post('/addTrainingPlan', authenticateToken, async (req, res) => {
         } = req.body;
 
         // Check if fields exist
-        if (!email || !name || !description || !days_per_week || !thumbnail_image || !is_current_plan) {
+        if (!email || !name) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 

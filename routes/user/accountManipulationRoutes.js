@@ -68,6 +68,20 @@ router.delete('/delete', authenticateToken, async (req, res) => {
 	}
 });
 
+router.get('/checkToken', authenticateToken, (req, res) => {
+	if(req.user?.email){
+		res.status(200).json({
+			message: 'This is a protected route',
+			tokenStatus: true,
+		});
+	} else {
+		res.status(403).json({
+			message: 'Token is not valid',
+			tokenStatus: false,
+		});
+	}
+});
+
 router.get('/protected', authenticateToken, (req, res) => {
 	res.status(200).json({
 		message: 'This is a protected route',

@@ -1,23 +1,17 @@
 import express from "express";
-import { addTrainiDayToTrainingPlan, deleteTrainingDay, getAllTrainingDays, updateTrainignDay } from "../../controllers/trainings/trainingDaysController.js";
-
 import { authenticateToken } from '../../middleware/authenticateToken.js'; 
+import { addTrainiDayToTrainingPlan, deleteTrainingDay, getAllTrainingDays, updateTrainignDay } from "../../controllers/trainings/trainingDaysController.js";
 
 const router = express.Router();
 
 router.get('/getTrainingDays', authenticateToken, async (req, res) => {
     try {
-		const { email } = req.user;
-
-		if(!email){
-			console.log('Cant get email from token');
-			res.status(403).json({ message: 'Wrong token'})
-		}
-
         const { trainingPlanId } = req.query;
 
+		if (!trainingPlanId) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
 		
-
         // Get training days
         const result = await getAllTrainingDays(trainingPlanId);
 
@@ -44,14 +38,11 @@ router.get('/getTrainingDays', authenticateToken, async (req, res) => {
 
 router.post('/addTrainingDay', authenticateToken, async (req, res) => {
     try {
-		const { email } = req.user;
-
-		if(!email){
-			console.log('Cant get email from token');
-			res.status(403).json({ message: 'Wrong token'})
-		}
-
 		const { trainingPlanId, dayName, dayDescription } = req.body;
+
+		if (!trainingPlanId || !dayName || !dayDescription) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
         
 		const result = await addTrainiDayToTrainingPlan(trainingPlanId, dayName, dayDescription);
 
@@ -75,9 +66,13 @@ router.post('/addTrainingDay', authenticateToken, async (req, res) => {
     }
 })
 
-router.put('/updateTrainingDays', async (req, res) => {
+router.put('/updateTrainingDays', authenticateToken, async (req, res) => {
     try {
 		const { day_id, dayName, dayDescription } = req.body;
+
+		if (!day_id || !dayName || !dayDescription) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
         
 		const result = await updateTrainignDay(day_id, dayName, dayDescription);
 
@@ -103,8 +98,11 @@ router.put('/updateTrainingDays', async (req, res) => {
 
 router.delete('/deleteTrainingDays', authenticateToken, async (req, res) => {
     try {
-
 		const { day_id } = req.body;
+		
+		if (!day_id) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
         
 		const result = await deleteTrainingDay(day_id);
 

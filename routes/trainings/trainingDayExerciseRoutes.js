@@ -1,13 +1,16 @@
 import express from "express";
+import { authenticateToken } from '../../middleware/authenticateToken.js';
 import { addExerciseToTrainingDay, deleteExercisesInDay, getExercisesInDay, updateExercisesInDay } from "../../controllers/trainings/trainingDayExerciseController.js";
-
-import { authenticateToken } from '../../middleware/authenticateToken.js'; 
 
 const router = express.Router();
 
 router.get('/getDayExercise', authenticateToken, async (req, res) => {
     try {
         const { day_id } = req.query;
+
+		if (!day_id) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
 
         // Get exercise in training day
         const result = await getExercisesInDay(day_id);
@@ -36,9 +39,11 @@ router.post('/addDayExercise', authenticateToken, async (req, res) => {
     try {
         const {day_id, exercise_id, muscle_group, description, rest_time, sets, reps, weight} = req.body;
 
+		if (!day_id || !exercise_id || !muscle_group || !description || !rest_time || !sets || !reps || !weight) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
 		const result = await addExerciseToTrainingDay(day_id, exercise_id, muscle_group, description, rest_time, sets, reps, weight);
-		// console.log(' day_id: ' + day_id + ' exercise_id: ' + exercise_id + ' muscle_group: ' + muscle_group + ' description: ' + description + ' rest_time: ' + rest_time + ' sets: ' + sets + ' reps: ' + reps + ' weight: ' + weight);
-		// const result = {status: true};
 		
 		if(result.status){
 			console.log(`Data for exersise in training day: ${day_id} has been added successfully`);
@@ -60,12 +65,15 @@ router.post('/addDayExercise', authenticateToken, async (req, res) => {
     }
 })
 
-router.put('/updateDayExercise', async (req, res) => {
+router.put('/updateDayExercise', authenticateToken, async (req, res) => {
     try {
 		const { muscle_group, rest_time, sets, reps, weight, day_exercise_id } = req.body;
 
+		if (!muscle_group || !rest_time || !sets || !reps || !weight || !day_exercise_id) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
 		const result = await updateExercisesInDay(muscle_group, rest_time, sets, reps, weight, day_exercise_id);
-		console.log('eer')
 
 		if(result.status){
 			console.log(`Exercise with ${day_exercise_id} has been updated`);
@@ -89,6 +97,10 @@ router.put('/updateDayExercise', async (req, res) => {
 router.delete('/deleteDayExercise', authenticateToken, async (req, res) => {
     try {
 		const { day_exercise_id } = req.body;
+
+		if (!day_exercise_id) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
 
 		const result = await deleteExercisesInDay(day_exercise_id);
 

@@ -1,26 +1,16 @@
 import express from 'express';
-import { getAllTrainingPlans, addNewTrainingPlan, deleteTrainingPlan, updateTrainingPlan } from '../../controllers/trainings/trainingPlansController.js';
-
 import { authenticateToken } from '../../middleware/authenticateToken.js'; 
-
+import { getAllTrainingPlans, addNewTrainingPlan, deleteTrainingPlan, updateTrainingPlan } from '../../controllers/trainings/trainingPlansController.js';
 
 const router = express.Router();
 
 // Route to get training plans
-router.get('/trainingPlans', authenticateToken, async (req, res) => {
+router.get('/trainingPlans', authenticateToken,  async (req, res) => {
     try {
-        // Get data from query parameters
         const { email } = req.user;
 
-        // Validate email
-        if (!email) {
-            return res.status(400).json({ message: 'Email is required' });
-        }
-
-        // Get training plans
         const trainingPlans = await getAllTrainingPlans(email);
         
-        // Send status to client
         if (trainingPlans.status) {
             res.status(200).json(
                 { 
@@ -47,7 +37,6 @@ router.get('/trainingPlans', authenticateToken, async (req, res) => {
 
 router.post('/addTrainingPlan', authenticateToken, async (req, res) => {
     try {
-        // Get data from body
         const { email } = req.user;
 
         const { 
@@ -58,12 +47,11 @@ router.post('/addTrainingPlan', authenticateToken, async (req, res) => {
             is_current_plan 
         } = req.body;
 
-        // Validate input
-        if (!email || !name || !description || !days_per_week) {
+        // Check if fields exist
+        if (!email || !name || !description || !days_per_week || !thumbnail_image || !is_current_plan) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        // Add new training plan
         const addingNewPlan = await addNewTrainingPlan(
             email, 
             name, 
@@ -73,7 +61,6 @@ router.post('/addTrainingPlan', authenticateToken, async (req, res) => {
             is_current_plan
         );
 
-        // Send status to client
         if (addingNewPlan.status) {
             console.log(addingNewPlan.message);
             res.status(200).json(
@@ -96,7 +83,6 @@ router.delete('/deleteTrainingPlan', authenticateToken, async (req, res) => {
         const { email } = req.user
         const { trainingPlanId } = req.body;
 
-        // Validate input
         if (!email || !trainingPlanId) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
@@ -120,9 +106,8 @@ router.delete('/deleteTrainingPlan', authenticateToken, async (req, res) => {
     }
 });
 
-router.put('/updateTrainingPlan', async (req, res) => {
+router.put('/updateTrainingPlan', authenticateToken, async (req, res) => {
     try {
-        // Get data from body
         const { 
             email,
             trainingPlanId,
@@ -133,12 +118,10 @@ router.put('/updateTrainingPlan', async (req, res) => {
             is_current_plan 
         } = req.body;
 
-        // Validate input
-        if (!email || !trainingPlanId || !name || !description || !days_per_week) {
+        if (!email || !trainingPlanId || !name || !description || !days_per_week || !thumbnail_image || !is_current_plan) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        // Update training plan
         const updatingPlan = await updateTrainingPlan(
             email, 
             trainingPlanId,

@@ -1,7 +1,6 @@
 import express from 'express'
-import { getAllExercisesFromLibrary, updateExerciseInLibrary, deleteExerciseFromLibrary, addExerciseToLibrary } from '../../controllers/trainings/trainingLibraryController.js';
-
 import { authenticateToken } from '../../middleware/authenticateToken.js'; 
+import { getAllExercisesFromLibrary, updateExerciseInLibrary, deleteExerciseFromLibrary, addExerciseToLibrary } from '../../controllers/trainings/trainingLibraryController.js';
 
 const router = express.Router();
 
@@ -9,8 +8,11 @@ router.get('/getAllExercises', authenticateToken, async (req, res) => {
     try {
         const { muscle_group } = req.query;
 
-        const result = await getAllExercisesFromLibrary(muscle_group);
+        if (!muscle_group) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
 
+        const result = await getAllExercisesFromLibrary(muscle_group);
 
         if(result.status){
             console.log('Found some exercises in library');
@@ -25,9 +27,13 @@ router.get('/getAllExercises', authenticateToken, async (req, res) => {
     }
 })
 
-router.post('/addExerciseToLibrary', async (req, res) => {
+router.post('/addExerciseToLibrary', authenticateToken, async (req, res) => {
     try {
         const { name, muscle_group, equipment, difficulty, video_url, instructions } = req.body;
+
+        if (!name || !muscle_group || !equipment || !difficulty || !video_url || !instructions) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
 
         const result = await addExerciseToLibrary(name, muscle_group, equipment, difficulty, video_url, instructions);
 
@@ -45,12 +51,15 @@ router.post('/addExerciseToLibrary', async (req, res) => {
     }
 })
 
-router.put('/updateExerciseToLibrary', async (req, res) => {
+router.put('/updateExerciseToLibrary', authenticateToken, async (req, res) => {
     try {
         const { exercise_id, name, muscle_group, equipment, difficulty, video_url, instructions } = req.body;
 
-        const result = await updateExerciseInLibrary(exercise_id, name, muscle_group, equipment, difficulty, video_url, instructions);
+        if (!name || !muscle_group || !equipment || !difficulty || !video_url || !instructions) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
 
+        const result = await updateExerciseInLibrary(exercise_id, name, muscle_group, equipment, difficulty, video_url, instructions);
 
         if(result.status){
             console.log(`Updated ${name} in library`);
@@ -65,9 +74,13 @@ router.put('/updateExerciseToLibrary', async (req, res) => {
     }
 })
 
-router.delete('/deleteExerciseToLibrary', async (req, res) => {
+router.delete('/deleteExerciseToLibrary', authenticateToken, async (req, res) => {
     try {
         const { exercise_id } = req.body;
+
+        if (!exercise_id) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
 
         const result = await deleteExerciseFromLibrary(exercise_id);
 

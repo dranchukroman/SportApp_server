@@ -74,6 +74,19 @@ class TrainingPlans {
     }
   }
 
+  static async getTrainingPlanById(trainingPlanId){
+    try {
+        const result = await db.query(`
+            SELECT * FROM training_plans WHERE plan_id = $1;
+        `, [trainingPlanId]);
+
+        return result.rows[0];
+    } catch (error) {
+        console.log(`Error while getting training plan data ${trainingPlanId} from db: `, error);
+        return null;
+    }
+  }
+
   static async updateTrainingPlan(plan_id, name, description, days_per_week, thumbnail_image, is_current_plan){
     try {
         const resutl = await db.query(`

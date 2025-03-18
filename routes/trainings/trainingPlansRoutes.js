@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticateToken } from '../../middleware/authenticateToken.js'; 
-import { getAllTrainingPlans, addNewTrainingPlan, deleteTrainingPlan, updateTrainingPlan } from '../../controllers/trainings/trainingPlansController.js';
+import { getAllTrainingPlans, getTrainingPlanById, addNewTrainingPlan, deleteTrainingPlan, updateTrainingPlan } from '../../controllers/trainings/trainingPlansController.js';
 
 const router = express.Router();
 
@@ -31,6 +31,36 @@ router.get('/trainingPlans', authenticateToken,  async (req, res) => {
         }
     } catch (error) {
         console.error('Error while getting all trainings in:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+router.get('/trainingPlan', authenticateToken, async (req, res) => {
+    try {
+        const { trainingPlanId } = req.query;
+        
+        if(!trainingPlanId){
+
+        }
+
+        const trainingPlan = await getTrainingPlanById(trainingPlanId);
+
+        if (trainingPlan.status) {
+            res.status(200).json(
+                { 
+                    data: trainingPlan.data
+                }
+            );
+        } else {
+            console.log(`Can't find any training plan with id: ${trainingPlanId}`);
+            res.status(404).json(
+                { 
+                    data: null
+                }
+            );
+        }
+    } catch (error) {
+        console.error(`Error while getting training plan ${req.query.trainingPlanId}:`, error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
@@ -108,8 +138,9 @@ router.delete('/deleteTrainingPlan', authenticateToken, async (req, res) => {
 
 router.put('/updateTrainingPlan', authenticateToken, async (req, res) => {
     try {
+        const { email } = req.user;
+
         const { 
-            email,
             trainingPlanId,
             name, 
             description, 
@@ -118,7 +149,7 @@ router.put('/updateTrainingPlan', authenticateToken, async (req, res) => {
             is_current_plan 
         } = req.body;
 
-        if (!email || !trainingPlanId || !name || !description || !days_per_week || !thumbnail_image || !is_current_plan) {
+        if (!email || !trainingPlanId || !name || !description || !days_per_week || !is_current_plan) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 

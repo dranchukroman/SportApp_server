@@ -37,6 +37,23 @@ export async function getAllTrainingPlans(email){
     }
 }
 
+export async function getTrainingPlanById(trainingPlanId){
+    try {
+        const response = await TrainingPlans.getTrainingPlanById(trainingPlanId);
+
+        return {
+            status: !!response,
+            data: response
+        }
+    } catch (error) {
+        console.log(`Error while getting training plan by id: ${trainingPlanId}: `, error);
+        return {
+            status: !!trainingPlans,
+            data: trainingPlans
+        }
+    }
+};
+
 export async function addNewTrainingPlan(email, name, description, days_per_week, thumbnail_image, is_current_plan){
     try {
         // Check if user exist and get data
@@ -121,22 +138,6 @@ export async function updateTrainingPlan(email, trainingPlanId, name, descriptio
             return {
                 status: false,
                 message: `Can't find ${email} in db`
-            }
-        }
-        console.log(trainingPlanId);
-        // Check if all fields exist
-        if(!userData.data.user_id ||
-            !trainingPlanId ||
-            !name ||
-            !description ||
-            !days_per_week ||
-            !thumbnail_image ||
-            !is_current_plan
-        ) {
-            console.log(`Error while updatin training plan for ${email}`);
-            return {
-                status: false,
-                message: `Some training plan data missed somewhere for ${email}`
             }
         }
 

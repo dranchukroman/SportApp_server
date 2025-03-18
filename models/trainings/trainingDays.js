@@ -44,12 +44,12 @@ class TrainingDays {
   static async getTrainingDayById(day_id){
     try {
         const result = await db.query(`
-            SELECT * FROM training_days WHERE day_id = $1 ORDER BY "order";
+            SELECT * FROM training_days WHERE day_id = $1;
         `, [
             day_id
         ]);
 
-        return result.rows;
+        return result.rows[0];
     } catch (error) {
         console.log('Error while getting all training days in training plan: ', error);
         return false;

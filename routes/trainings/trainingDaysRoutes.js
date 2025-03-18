@@ -1,6 +1,6 @@
 import express from "express";
 import { authenticateToken } from '../../middleware/authenticateToken.js'; 
-import { addTrainiDayToTrainingPlan, deleteTrainingDay, getAllTrainingDays, updateTrainignDay } from "../../controllers/trainings/trainingDaysController.js";
+import { addTrainiDayToTrainingPlan, getTrainingDayData, deleteTrainingDay, getAllTrainingDays, updateTrainignDay } from "../../controllers/trainings/trainingDaysController.js";
 
 const router = express.Router();
 
@@ -28,6 +28,38 @@ router.get('/getTrainingDays', authenticateToken, async (req, res) => {
 				trainingPlanId: trainingPlanId,
 				trainingDaysData: null,
 				message: `Can't get training days for ${trainingPlanId}`
+			})
+		}
+    } catch (error) {
+		console.error(error);
+		res.status(500).json({ message: 'Internal server error' });
+    }
+})
+
+router.get('/trainingDay', authenticateToken, async (req, res) => {
+    try {
+        const { trainingDayId } = req.query;
+
+		if (!trainingDayId) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+		
+        // Get training days
+        const result = await getTrainingDayData(trainingDayId);
+
+		// Send status to client
+		if(result.status){
+			console.log(`Data for ${trainingDayId} training plan has been gotten successfully`);
+			res.status(200).json({
+				trainingDayId: trainingDayId,
+				trainingDaysData: result
+			})
+		} else{
+			console.log(`Can't get training days for ${trainingDayId} trining plan`);
+			res.status(404).json({
+				trainingDayId: trainingDayId,
+				trainingDaysData: null,
+				message: `Can't get training days for ${trainingDayId}`
 			})
 		}
     } catch (error) {

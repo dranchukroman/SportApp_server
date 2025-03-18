@@ -22,7 +22,8 @@ app.use(cors({
   origin: [
     "http://localhost:3000", // локальний сервер для розробки
     "http://192.168.0.106:3000", // локальна IP-адреса для розробки
-    "https://sportappclient-production.up.railway.app" // адреса вашого клієнта на Railway
+    "https://sportappclient-production.up.railway.app", // адреса вашого клієнта на Railway,
+    'http://192.168.0.4:3000'
   ], // Дозволені домени
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods

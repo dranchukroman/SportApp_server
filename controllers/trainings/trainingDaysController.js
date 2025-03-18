@@ -19,6 +19,25 @@ export async function getAllTrainingDays(trainingPlanId){
     }
 }
 
+export async function getTrainingDayData(trainingDayId){
+    try {
+        const result = await TrainingDays.getTrainingDayById(trainingDayId);
+
+        return {
+            status: !!result,
+            data: result
+        }
+    } catch (error) {
+        console.log(`Error while getting training day ${trainingDayId}: `, error);
+        return {
+            status: false, 
+            data: null,
+            message: `Error while getting training day ${trainingDayId}`,
+            errMessage: error,
+        }
+    }
+}
+
 export async function addTrainiDayToTrainingPlan(trainingPlanId, dayName, dayDescription){
     try {
         const result = TrainingDays.addNewTrainingDayToTrainingPlan(trainingPlanId, dayName, dayDescription, 1);

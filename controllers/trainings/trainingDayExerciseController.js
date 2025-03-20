@@ -19,6 +19,22 @@ export async function getExercisesInDay(day_id){
     }
 }
 
+export async function getExerciseById(exerciseId){
+    try {
+        const result = await DayExercises.getExerciseById(exerciseId);
+        return {
+            status: !!result,
+            data: result,
+        }
+    } catch (error) {
+        console.log(`Error while getting exercise with id: ${exerciseId}`);
+        return {
+            status: false,
+            data: null,
+        }
+    }
+}
+
 export async function addExerciseToTrainingDay(day_id, exercise_id, muscle_group, description, rest_time, sets, reps, weight){
     try {
         const result = await DayExercises.addExerciseToDay(day_id, exercise_id, muscle_group, description, rest_time, sets, reps, weight);
@@ -35,9 +51,9 @@ export async function addExerciseToTrainingDay(day_id, exercise_id, muscle_group
         }
     }
 }
-export async function updateExercisesInDay(muscle_group, rest_time, sets, reps, weight, day_exercise_id){
+export async function updateExercisesInDay(muscle_group, rest_time, sets, reps, weight, day_exercise_id, exercise_id){
     try {
-        const result = await DayExercises.updateExerciseInDay(muscle_group, rest_time, sets, reps, weight, day_exercise_id);
+        const result = await DayExercises.updateExerciseInDay(muscle_group, rest_time, sets, reps, weight, day_exercise_id, exercise_id);
 
         return {
             status: !!result

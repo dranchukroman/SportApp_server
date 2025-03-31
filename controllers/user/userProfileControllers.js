@@ -25,7 +25,7 @@ export async function getUserProfile(req, res) {
   }
   try {
     const profile = await UserProfiles.getUserProfileInfo(id);
-    if (profile) {
+    if (profile && profile.length > 0) {
       res.status(200).json(profile);
     } else {
       res.status(404).json({ message: 'User profile not found' });

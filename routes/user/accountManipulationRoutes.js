@@ -71,7 +71,7 @@ router.delete('/delete', authenticateToken, async (req, res) => {
 router.get('/checkToken', authenticateToken, (req, res) => {
 	if(req.user?.email){
 		res.status(200).json({
-			message: 'This is a protected route',
+			message: 'Token is valid',
 			tokenStatus: true,
 		});
 	} else {
@@ -80,13 +80,6 @@ router.get('/checkToken', authenticateToken, (req, res) => {
 			tokenStatus: false,
 		});
 	}
-});
-
-router.get('/protected', authenticateToken, (req, res) => {
-	res.status(200).json({
-		message: 'This is a protected route',
-		user: req.user,
-	});
 });
 
 export default router;

@@ -62,11 +62,11 @@ class DayExercises {
     }
   }
 
-  static async updateExerciseInDay(muscle_group, rest_time, sets, reps, weight, day_exercise_id, exercise_id) {
+  static async updateExerciseInDay(muscle_group, rest_time, sets, reps, weight, day_exercise_id, exercise_id, description) {
     try {
       const result = await db.query(`
         UPDATE day_exercises 
-          SET muscle_group = $1, rest_time = $2, sets = $3, reps = $4, weight = $5, exercise_id = $7 
+          SET muscle_group = $1, rest_time = $2, sets = $3, reps = $4, weight = $5, exercise_id = $7, description = $8
 
           WHERE day_exercise_id = $6;  
       `, [
@@ -76,7 +76,8 @@ class DayExercises {
         reps,
         weight,
         day_exercise_id,
-        exercise_id
+        exercise_id,
+        description
       ])
       return result.rowCount > 0;
     } catch (error) {

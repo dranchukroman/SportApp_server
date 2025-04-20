@@ -149,7 +149,7 @@ router.put('/updateTrainingPlan', authenticateToken, async (req, res) => {
             is_current_plan 
         } = req.body;
 
-        if (!email || !trainingPlanId || !name || !description || !days_per_week || !is_current_plan) {
+        if (!email || !trainingPlanId || !name || !description || !days_per_week) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 

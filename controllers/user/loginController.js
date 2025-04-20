@@ -1,5 +1,8 @@
 import Users from '../../models/user/users.js';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt'; // Hashing passwords
+import { generateCode, storeCode, verifyCode, deleteCode, getCodeData } from '../../utils/codeStorage.js';
+import { sendVerificationCode } from '../../utils/emailService.js'
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
@@ -8,7 +11,6 @@ export async function loginUser(email, password) {
 	try {
 		// Check if user
 		const loginResult = await Users.checkUserByEmailAndPassword(email, password);
-
 		// Check status 
 		if (loginResult.success) {
 			// Generate JWT
@@ -30,51 +32,87 @@ export async function loginUser(email, password) {
 			status: false,
 			message: loginResult.error,
 		};
-  } catch (error) {
-	console.error('Error during login:', error.message);
-	return {
-		status: false,
-		message: 'Internal server error',
-	};
-}
-}
-
-// Function to create new account for user
-export async function registerUser(email, password) {
-	try {
-		// Check if email already exist
-		const ifExistUser = await Users.checkUserByEmail(email);
-
-		// Send message if exist
-		if (ifExistUser.success) {
-			console.log('User already exists:', email);
-			return {
-				status: false,
-				message: 'User already exists',
-			};
-		}
-
-		// Adding new user 
-		const registerResult = await Users.addNewUser(email, password);
-
-		// Check if registration was successful and return message
-		if (registerResult.success) {
-			console.log('New user registered successfully:', email);
-			return {
-				status: true,
-				message: 'Registration successful',
-			};
-		}
-			return {
-				status: false,
-				message: registerResult.error || 'Failed to register user',
-			};
 	} catch (error) {
-		console.error('Error during registration:', error.message);
+		console.error('Error during login:', error.message);
 		return {
 			status: false,
 			message: 'Internal server error',
 		};
+	}
+}
+
+export async function registerNewUser(req, res) {
+	try {
+		const { email, password } = req.body;
+		if (!email || !password) {
+			return res.status(400).json({ message: 'Email and password are required!' });
+		}
+
+		const isUserExist = await Users.checkUserByEmail(email);
+		if (isUserExist) {
+			return res.status(400).json({ message: 'User with this email already exist!' });
+		}
+
+		const code = generateCode();
+		const hashedPassword = await bcrypt.hash(password, 10);
+
+		const mailOptions = {
+			from: `"Sport App" <${process.env.EMAIL_USER}>`,
+			to: email,
+			subject: 'Your Verification Code',
+			text: `Your verification code is: ${code}`,
+			html: `
+			  <div style="font-family: sans-serif;">
+				<h2>Email Verification</h2>
+				<p>Your verification code is:</p>
+				<h3 style="color: #007bff;">${code}</h3>
+				<p>This code will expire in 10 minutes.</p>
+			  </div>
+			`,
+		};
+
+		const isDelivered = await sendVerificationCode(email, mailOptions);
+		if (!isDelivered) {
+			return res.status(400).json({ message: 'Can\'t send verification code!' });
+		}
+
+		storeCode(email, hashedPassword, code);
+
+		return res.status(200).json({ message: 'Verification code has been send to user' });
+	} catch (error) {
+		console.error('Internal server error: ', error);
+		return res.status(500).json({ message: 'Internal server error' });
+	}
+}
+
+// Verify registration code
+export async function codeVerification(req, res) {
+	try {
+		const { email, verificationCode } = req.body;
+
+		if (!email || !verificationCode) {
+			return res.status(400).json({ message: 'Email and code are require' });
+		}
+
+		const isValid = verifyCode(email, verificationCode);
+
+		if (!isValid) {
+			return res.status(401).json({ message: 'Invalid or expired code' });
+		}
+		const { password } = getCodeData(email);
+
+		const isCreated = await Users.addNewUser(email, password)
+
+		if (!isCreated) {
+			return res.status(401).json({ message: 'Creating account failed' });
+		}
+
+		deleteCode(email);
+
+		return res.status(201).json({ message: 'Email verified successfully' })
+	} catch (error) {
+		console.error('Internal server error: ', error);
+		return res.status(500).json({ message: 'Internal server error' });
 	}
 }
 
@@ -85,7 +123,7 @@ export async function updatePassword(email, newPassword) {
 		const userResult = await Users.checkUserByEmail(email);
 
 		// Send message if not exist
-		if (!userResult.success) {
+		if (!userResult) {
 			return {
 				status: false,
 				message: `User with email ${email} not found.`,
@@ -125,10 +163,10 @@ export async function updatePassword(email, newPassword) {
 export async function deleteUser(email) {
 	try {
 		// Check if user exist
-		const loginResult = await Users.checkUserByEmail(email);
+		const isUserExist = await Users.checkUserByEmail(email);
 
 		// If not exist sent message
-		if (!loginResult.success) {
+		if (!isUserExist) {
 			return {
 				status: false,
 				message: 'Invalid email.',
@@ -136,8 +174,7 @@ export async function deleteUser(email) {
 		}
 
 		// Get user data and delete user
-		const user = loginResult.data;
-		const deleteResult = await Users.deleteUser(user.user_id);
+		const deleteResult = await Users.deleteUser(isUserExist.user_id);
 
 		if (deleteResult.success) {
 			console.log(`User ${email} deleted successfully`);

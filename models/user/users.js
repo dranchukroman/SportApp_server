@@ -9,12 +9,10 @@ class Users {
 	}
 
 	// Adding new user to db
-	static async addNewUser(email, password) {
+	static async addNewUser(email, hashedPassword) {
 		try {
-			// Enrypting password
-			const hashedPassword = await bcrypt.hash(password, 10);
 			// Add user to db
-			await db.query(
+			const result = await db.query(
 				`
 			INSERT INTO users (email, password) 
 			VALUES ($1, $2);
@@ -25,37 +23,25 @@ class Users {
 			);
 
 			// Retun status
-			return {
-				success: true
-			};
+			return result.rowCount > 0;
 		} catch (error) {
 			console.error('Error while adding new user:', error.message);
-			return { success: false, error: error.message };
+			return false;
 		}
 	}
 
 	// Check user by email
 	static async checkUserByEmail(email) {
 		try {
-			// Send request to db
 			const result = await db.query(`
-				SELECT * FROM users WHERE email = $1;
-				`, [
-					email
-				]
+				SELECT * FROM users WHERE email = $1 LIMIT 1;
+				`, [email]
 			);
-			// Check if user exist
-			if (result.rows.length === 0) {
-				return { success: false, error: 'User not found' };
-			}
-			// Return result
-			return { 
-				success: true, 
-				data: result.rows[0] 
-			};
+
+			return result.rows[0] 
 		} catch (error) {
-			console.error('Error while getting user by email:', error.message);
-			return { success: false, error: error.message };
+			console.error('Error while checking user by email from DB:', error.message);
+			return null;
 		}
 	}
 

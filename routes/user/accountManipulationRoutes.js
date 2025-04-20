@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticateToken } from '../../middleware/authenticateToken.js';
-import { loginUser, registerUser, updatePassword, deleteUser } from '../../controllers/user/loginController.js';
+import { loginUser, updatePassword, deleteUser, registerNewUser, codeVerification } from '../../controllers/user/loginController.js';
 
 const router = express.Router();
 
@@ -9,6 +9,7 @@ router.post('/login', async (req, res) => {
 		const { email, password } = req.body;
 
 		const result = await loginUser(email, password);
+		console.log(result)
 
 		if (result.status) {
 			res.status(200).json({ message: result.message, token: result.token });
@@ -21,26 +22,28 @@ router.post('/login', async (req, res) => {
 	}
 });
 
-router.post('/register', async (req, res) => {
-	try {
-		const { email, password } = req.body;
+// router.post('/register', async (req, res) => {
+// 	try {
+// 		const { email, password } = req.body;
 
-		if (!email || !password) {
-			return res.status(400).json({ message: 'Missing required fields' });
-		}
+// 		if (!email || !password) {
+// 			return res.status(400).json({ message: 'Missing required fields' });
+// 		}
 
-		const result = await registerUser(email, password);
+// 		const result = await registerUser(email, password);
 
-		if (result.status) {
-			res.status(201).json({ message: result.message });
-		} else {
-			res.status(409).json({ message: result.message });
-		}
-	} catch (error) {
-		console.error('Error during registration:', error);
-		res.status(500).json({ message: 'Internal server error' });
-	}
-});
+// 		if (result.status) {
+// 			res.status(201).json({ message: result.message });
+// 		} else {
+// 			res.status(409).json({ message: result.message });
+// 		}
+// 	} catch (error) {
+// 		console.error('Error during registration:', error);
+// 		res.status(500).json({ message: 'Internal server error' });
+// 	}
+// });
+router.post('/register', registerNewUser);
+router.post('/codeVerification', codeVerification);
 
 router.post('/forgotPassword', async (req, res) => {
 	try {

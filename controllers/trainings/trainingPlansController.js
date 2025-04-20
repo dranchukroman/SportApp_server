@@ -5,7 +5,7 @@ export async function getAllTrainingPlans(email){
     try {
         // Check if user exist and get data
         const userData = await Users.checkUserByEmail(email);
-        if(!userData.success){
+        if(!userData){
             console.log(`Can't find ${email} in db`);
             return {
                 status: false,
@@ -14,7 +14,7 @@ export async function getAllTrainingPlans(email){
         }
 
         // Get and check training plans
-        const trainingPlans = await TrainingPlans.getAllTrainingPlans(userData.data.user_id);
+        const trainingPlans = await TrainingPlans.getAllTrainingPlans(userData.user_id);
         if(!trainingPlans){
             console.log(`Can't get all training plans for ${email}`);
             return {

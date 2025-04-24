@@ -9,9 +9,9 @@ class Users {
 	}
 
 	// Adding new user to db
-	static async addNewUser(email, hashedPassword) {
+	static async addNewUser(email, password) {
 		try {
-			// Add user to db
+			const hashedPassword = await bcrypt.hash(password, 10);
 			const result = await db.query(
 				`
 			INSERT INTO users (email, password) 
@@ -55,6 +55,9 @@ class Users {
 				`, [email]
 			);
 
+			console.log(password);
+			console.log(result.rows);
+
 			// If length is 0 it means that user have not been found
 			if (result.rows.length === 0) {
 				return { success: false, error: 'User not found' };
@@ -84,26 +87,24 @@ class Users {
 	}
 
 	// Update user password
-	static async updateUserPassword(password, user_id) {
+	static async updateUserPassword(email, password) {
 		try {
 			// Encrypti new password
 			const hashedPassword = await bcrypt.hash(password, 10);
-			await db.query(`
+			const result = await db.query(`
 				UPDATE users 
 				SET password = $1 
-				WHERE user_id = $2;
+				WHERE email = $2;
 			`,  [
 					hashedPassword, 
-					user_id
+					email
 			    ]
 			);
 			// Return status
-			return { 
-				success: true 
-			};
+			return result.rowCount > 0;
 		} catch (error) {
 			console.error('Error while updating user password:', error.message);
-			return { success: false, error: error.message };
+			return false;
 		}
 	}
 

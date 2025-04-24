@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticateToken } from '../../middleware/authenticateToken.js';
-import { loginUser, updatePassword, deleteUser, registerNewUser, codeVerification } from '../../controllers/user/loginController.js';
+import { loginUser, updatePassword, isUserExist, sendVerificationCode, deleteUser, registerNewUser, codeVerification } from '../../controllers/user/loginController.js';
 
 const router = express.Router();
 
@@ -22,37 +22,12 @@ router.post('/login', async (req, res) => {
 	}
 });
 
-// router.post('/register', async (req, res) => {
-// 	try {
-// 		const { email, password } = req.body;
-
-// 		if (!email || !password) {
-// 			return res.status(400).json({ message: 'Missing required fields' });
-// 		}
-
-// 		const result = await registerUser(email, password);
-
-// 		if (result.status) {
-// 			res.status(201).json({ message: result.message });
-// 		} else {
-// 			res.status(409).json({ message: result.message });
-// 		}
-// 	} catch (error) {
-// 		console.error('Error during registration:', error);
-// 		res.status(500).json({ message: 'Internal server error' });
-// 	}
-// });
 router.post('/register', registerNewUser);
+router.post('/isUserExist', isUserExist);
+router.post('/sendVerificationCode', sendVerificationCode);
 router.post('/codeVerification', codeVerification);
 
-router.post('/forgotPassword', async (req, res) => {
-	try {
-		// TO DO
-	} catch (error) {
-		console.error('Error during registration:', error);
-		res.status(500).json({ message: 'Internal server error' });
-	}
-});
+router.post('/updatePassword', updatePassword);
 
 router.delete('/delete', authenticateToken, async (req, res) => {
 	try {

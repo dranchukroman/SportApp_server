@@ -5,9 +5,9 @@ export function generateCode() {
     return code.toString().padStart(6, '0');
 }
 
-export function storeCode(email, password, code) {
+export function storeCode(email, code) {
     const expiresAt = Date.now() + 10 * 60 * 1000;
-    codes.set(email, { code, password, expiresAt });
+    codes.set(email, { code, expiresAt });
 }
 
 export function getCodeData(email) {

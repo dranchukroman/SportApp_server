@@ -142,7 +142,7 @@ export async function updatePassword(req, res) {
 
 		// Get data and update user password
 		const isUpdated = await Users.updateUserPassword(email, newPassword);
-		if(!isUpdated) return res.status(401).json({ message: `Failed to update password for ${email}` });
+		if (!isUpdated) return res.status(401).json({ message: `Failed to update password for ${email}` });
 
 		return res.status(200).json({ message: `Password updated successfully for user ${email}` })
 	} catch (error) {
@@ -156,7 +156,6 @@ export async function deleteUser(email) {
 	try {
 		// Check if user exist
 		const isUserExist = await Users.checkUserByEmail(email);
-
 		// If not exist sent message
 		if (!isUserExist) {
 			return {
@@ -166,21 +165,21 @@ export async function deleteUser(email) {
 		}
 
 		// Get user data and delete user
-		const deleteResult = await Users.deleteUser(isUserExist.user_id);
+		const isDeleted = await Users.deleteUser(email);
 
-		if (deleteResult.success) {
-			console.log(`User ${email} deleted successfully`);
-			return {
-				status: true,
-				message: `User ${email} deleted successfully`,
-			};
-		} else {
+		if (!isDeleted) {
 			return {
 				status: false,
 				message: 'Failed to delete user.',
-				error: deleteResult.error,
+				error: isDeleted.error,
 			};
 		}
+
+		console.log(`User ${email} deleted successfully`);
+		return {
+			status: true,
+			message: `User ${email} deleted successfully`,
+		};
 	} catch (error) {
 		console.error(`Error while deleting user ${email}:`, error);
 		return {

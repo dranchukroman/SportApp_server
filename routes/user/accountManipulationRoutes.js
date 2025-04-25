@@ -26,9 +26,7 @@ router.post('/register', registerNewUser);
 router.post('/isUserExist', isUserExist);
 router.post('/sendVerificationCode', sendVerificationCode);
 router.post('/codeVerification', codeVerification);
-
 router.post('/updatePassword', updatePassword);
-
 router.delete('/delete', authenticateToken, async (req, res) => {
 	try {
 		const email = req.user.email;

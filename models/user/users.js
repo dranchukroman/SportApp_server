@@ -109,20 +109,18 @@ class Users {
 	}
 
 	// Delete user
-	static async deleteUser(user_id) {
+	static async deleteUser(email) {
 		try {
 			// Sent request to db to delete user
 			const result = await db.query(`
-				DELETE FROM users WHERE user_id = $1;
-			`, [user_id]);
+				DELETE FROM users WHERE email = $1;
+			`, [email]);
+
 			// Return status
-			return { 
-				success: true, 
-				result: result 
-			};
+			return result.rowCount > 0;
 		} catch (error) {
 			console.error('Error while deleting user:', error.message);
-			return { success: false, error: error.message };
+			return false;
 		}
 	}
 }

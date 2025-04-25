@@ -87,7 +87,7 @@ export async function sendVerificationCode(req, res) {
 
 		storeCode(email, code);
 
-		return res.status(200).json({ message: 'Verification code has been send to user' });
+		return res.status(200).json({ message: 'Verification code has been send to user', isDelivered });
 	} catch (error) {
 		console.error('Internal server error: ', error);
 		return res.status(500).json({ message: 'Internal server error' });
@@ -100,11 +100,8 @@ export async function isUserExist(req, res) {
 		if (!email) return res.status(400).json({ message: 'Email is require' });
 
 		const isUserExist = await Users.checkUserByEmail(email);
-
-		if (isUserExist) {
-			return res.status(200).json({ message: 'User do not exist', isExist: false });
-		}
-		return res.status(200).json({ message: 'User exist', isExist: true });
+		console.log(isUserExist);
+		return res.status(200).json({ message: `User ${isUserExist ? '' : 'do not '} exist`, isExist: isUserExist });
 	} catch (error) {
 		console.error('Internal server error: ', error);
 		return res.status(500).json({ message: 'Internal server error' });

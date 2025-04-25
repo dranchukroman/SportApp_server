@@ -38,7 +38,7 @@ class Users {
 				`, [email]
 			);
 
-			return result.rows[0] 
+			return result.rows.length > 0;
 		} catch (error) {
 			console.error('Error while checking user by email from DB:', error.message);
 			return null;

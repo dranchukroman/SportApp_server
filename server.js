@@ -1,6 +1,6 @@
 import express from "express";
 import cors from 'cors';
-import loginRoutes from './routes/user/accountManipulationRoutes.js';
+import loginRoutes from './routes/user/loginRoutes.js';
 import trainingsRoutes from './routes/trainings/trainingPlansRoutes.js';
 import trainingDaysRoutes from './routes/trainings/trainingDaysRoutes.js';
 import exercisesInDay from './routes/trainings/trainingDayExerciseRoutes.js'

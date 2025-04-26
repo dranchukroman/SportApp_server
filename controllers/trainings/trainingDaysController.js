@@ -1,81 +1,62 @@
 import TrainingDays from "../../models/trainings/trainingDays.js";
 
-export async function getAllTrainingDays(trainingPlanId){
+export async function getAllTrainingDays(req, res){
+    const { trainingPlanId } = req.query;
     try {
+        if (!trainingPlanId) return res.status(400).json({ message: 'Missing required fields' });
+
         const result = await TrainingDays.getAllTrainingDaysInTrainingPlan(trainingPlanId);
+        if(!result) res.status(404).json({ trainingPlanId: trainingPlanId, trainingDaysData: null, message: `Can't get training days for ${trainingPlanId}`})
 
-        return {
-            status: !!result,
-            data: result
-        }
+        return res.status(200).json({ trainingPlanId: trainingPlanId, trainingDaysData: result })
     } catch (error) {
-        console.log(`Error while getting training plan ${trainingPlanId}: `, error);
-        return {
-            status: false, 
-            data: null,
-            message: `Error while getting training plan ${trainingPlanId}`,
-            errMessage: error,
-        }
+        console.error(`Getting days for training plan with id ${trainingPlanId} failed: `, error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 }
 
-export async function getTrainingDayData(trainingDayId){
+export async function getTrainingDayData(req, res){
+    const { trainingDayId } = req.query;
     try {
+        if (!trainingDayId) return res.status(400).json({ message: 'Missing required fields' });
+
         const result = await TrainingDays.getTrainingDayById(trainingDayId);
+        if(!result) return res.status(404).json({ trainingDayId: trainingDayId, trainingDaysData: null, message: `Getting training day data failed` })
 
-        return {
-            status: !!result,
-            data: result
-        }
+        return res.status(200).json({ trainingDayId: trainingDayId, trainingDaysData: result });
     } catch (error) {
-        console.log(`Error while getting training day ${trainingDayId}: `, error);
-        return {
-            status: false, 
-            data: null,
-            message: `Error while getting training day ${trainingDayId}`,
-            errMessage: error,
-        }
+        console.error(`Getting days data with id ${trainingDayId} failed: `, error);
+		return res.status(500).json({ message: 'Internal server error' });
     }
 }
 
-export async function addTrainiDayToTrainingPlan(trainingPlanId, dayName, dayDescription){
+export async function addTrainiDayToTrainingPlan(req, res){
+    const { trainingPlanId, dayName, dayDescription } = req.body;
     try {
+        if (!trainingPlanId || !dayName) return res.status(400).json({ message: 'Missing required fields' });
+
         const result = TrainingDays.addNewTrainingDayToTrainingPlan(trainingPlanId, dayName, dayDescription, 1);
+        if(!result) return res.status(404).json({ trainingPlanId: trainingPlanId, status: result, message: 'Adding training plan failed' });
 
-        return {
-            status: !!result,
-            message: result 
-                ? `New training day for training plan ${trainingPlanId} has been created correctly`
-                : `New training day for training plan ${trainingPlanId} has not been created due some error`
-        }
+	    return res.status(200).json({ trainingPlanId: trainingPlanId, status: result, message: 'New training day has been added successfylly' });
     } catch (error) {
-        console.error(`Error while adding training day to ${trainingPlanId} training plan`);
-        return {
-            status: false,
-            message: `Error while adding training day to ${trainingPlanId} training plan`,
-            errMessage: error
-        }
+        console.error(`Adding day for training plan with id ${trainingPlanId} failed: `, error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 }
 
-export async function updateTrainignDay(day_id, new_name, new_description){
+export async function updateTrainignDay(req, res){
+    const { day_id, dayName, dayDescription } = req.body;
     try {
-        const result = TrainingDays.updateTrainingDayInTrainingPlan(day_id, new_name, new_description, 1);
+        if (!day_id || !dayName || !dayDescription) return res.status(400).json({ message: 'Missing required fields' });
 
-        return {
-            status: !!result,
-            message: result 
-                ? `Training day for training plan ${day_id} has been updated correctly`
-                : `Training day for training plan ${day_id} has not been updated due some error`
-        }
+        const result = TrainingDays.updateTrainingDayInTrainingPlan(day_id, dayName, dayDescription, 1);
+        if(!result) return res.status(404).json({ day_id: day_id, status: result, message: 'Training plan has not been updated' });
+
+        return res.status(200).json({ day_id: day_id, status: result })
     } catch (error) {
-        console.error(`Error while updating training day for ${day_id}`);
-        return {
-            status: false,
-            data: null,
-            message: `Error while updating training day for ${day_id}`,
-            errMessage: error
-        }
+        console.error(`Updating day with id ${day_id} failed: `, error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 }
 

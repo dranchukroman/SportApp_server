@@ -55,9 +55,6 @@ class Users {
 				`, [email]
 			);
 
-			console.log(password);
-			console.log(result.rows);
-
 			// If length is 0 it means that user have not been found
 			if (result.rows.length === 0) {
 				return { success: false, error: 'User not found' };

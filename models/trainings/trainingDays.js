@@ -19,7 +19,7 @@ class TrainingDays {
             order
         ]);
 
-        return true;
+        return result.rowCount > 0;
     } catch (error) {
         console.log('Error while adding new trainig day into training plan: ', error);
         return false;
@@ -69,7 +69,7 @@ class TrainingDays {
             day_id
         ]);
 
-        return true;
+        return result.rowCount > 0;
     } catch (error) {
         console.log('Error while updating training day in training plan: ', error);
         return false;

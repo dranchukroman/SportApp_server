@@ -1,163 +1,101 @@
 import TrainingPlans from '../../models/trainings/trainingPlans.js'
 import Users from '../../models/user/users.js';
 
-export async function getAllTrainingPlans(email){
+export async function getAllTrainingPlans(req, res){
+    const { id, email } = req.user;
     try {
-        // Check if user exist and get data
-        const userData = await Users.checkUserByEmail(email);
-        if(!userData){
-            console.log(`Can't find ${email} in db`);
-            return {
-                status: false,
-                message: `Can't find ${email} in db`
-            }
-        }
+		if(!id || !email) return res.status(400).json({ message: 'Can not get email or id from token' });
 
-        // Get and check training plans
-        const trainingPlans = await TrainingPlans.getAllTrainingPlans(userData.user_id);
-        if(!trainingPlans){
-            console.log(`Can't get all training plans for ${email}`);
-            return {
-                status: false,
-                message: `Can't get all training plans for ${email}`,
-            } 
-        }
+        const trainingPlans = await TrainingPlans.getAllTrainingPlans(id);
+        if(trainingPlans.length === 0) return res.status(200).json({ message: `There is no training plans for ${email}`, data: null });
 
-        // Return data
-        return {
-            status: !!trainingPlans,
-            data: trainingPlans
-        }
+        return res.status(200).json({ message: `Training plans for ${email}`, data: trainingPlans });
     } catch (error) {
-        console.log('Error durign getting all training plans: ', error);
-        return {
-            status: false,
-            message: 'Error durign getting all training plans'
-        }
+        console.error(`Getting training plan for ${email} failed: `, error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 }
 
-export async function getTrainingPlanById(trainingPlanId){
+export async function getTrainingPlanById(req, res){
+    const { trainingPlanId } = req.query;
+    const { email } = req.user;
     try {
+        if(!trainingPlanId) return res.status(401).json({ message: 'Training plan id is not defined'});
         const response = await TrainingPlans.getTrainingPlanById(trainingPlanId);
+        if(!response) return res.status(404).json({ message: `There is no plan with id ${trainingPlanId}`, data: null});
 
-        return {
-            status: !!response,
-            data: response
-        }
+        return res.status(200).json({ message: `Training plan with id ${trainingPlanId}`, data: response});
     } catch (error) {
-        console.log(`Error while getting training plan by id: ${trainingPlanId}: `, error);
-        return {
-            status: !!trainingPlans,
-            data: trainingPlans
-        }
+        console.error(`Error while getting training plan ${email}:`, error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
-export async function addNewTrainingPlan(email, name, description, days_per_week, thumbnail_image, is_current_plan){
+export async function addNewTrainingPlan(req, res){
+    const { email, id } = req.user;
     try {
-        // Check if user exist and get data
-        const userData = await Users.checkUserByEmail(email);
-        if(!userData.success){
-            console.log(`Can't find ${email} in db`);
-            return {
-                status: false,
-                message: `Can't find ${email} in db`
-            }
-        }
+        const { 
+            name, 
+            description, 
+            days_per_week, 
+            thumbnail_image, 
+            is_current_plan 
+        } = req.body;
 
-        // Check if all fields exist
-        if(!userData.data.user_id || 
-            !name ||
-            !description ||
-            !days_per_week
-            // !thumbnail_image ||
-            // !is_current_plan
-        ) {
-            console.log(`Error while getting data for new training plan for ${email}`);
-            return {
-                status: false,
-                message: `Some training plan data missed somewhere for ${email}`
-            }
-        }
+        if (!email || !name || !id) return res.status(400).json({ message: 'Missing required fields' });
+
         // If new plan is current delete other current plans
-        if(is_current_plan){
-            const deleteActivePlans = await TrainingPlans.deleteAllCurrentTrainingPlans(userData.data.user_id);
-        }
+        if(is_current_plan) await TrainingPlans.deleteAllCurrentTrainingPlans(id);
 
-        const result = await TrainingPlans.addNewTrainingPlan(userData.data.user_id, name, description, days_per_week, thumbnail_image, is_current_plan)
+        const newPlanId = await TrainingPlans.addNewTrainingPlan(id, name, description, days_per_week, thumbnail_image, is_current_plan);
+        if(!newPlanId) return res.status(404).json({ message: 'Creating training plan failed'});
 
-        return {
-            status: result != '',
-            planId: result,
-            message: result != ''
-                ? `Training plan for ${email} has been created`
-                : `Training plan for ${email} has not been created for some reason`
-        }
+        return res.status(200).json({ message: 'New training plan has been created', planId: newPlanId });
     } catch (error) {
-        console.error('Error durign addin new training plans: ', error);
-        return {
-            status: false,
-            message: 'Error durign getting all training plans'
-        }
+        console.error(`Adding training plan for ${email} failed: `, error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 }
 
-export async function deleteTrainingPlan(email, trainingPlanId){
+export async function deleteTrainingPlan(req, res){
+    const { email, id } = req.user
     try {
-        const userData = await Users.checkUserByEmail(email);
-        if(!userData.success){
-            console.log(`Can't find ${email} in db`);
-            return {
-                status: false,
-                message: `Can't find ${email} in db`
-            }
-        }
+        const { trainingPlanId } = req.body;
+        if (!email || !trainingPlanId) return res.status(400).json({ message: 'Missing required fields' });
 
-        const result = await TrainingPlans.deleteTrainingPlan(userData.data.user_id, trainingPlanId)
-        return {
-            status: !!result,
-            message: !!result 
-            ? `Training plan for ${email} has been deleted`
-            : `Training plan for ${email} has not been deleted for some reason`
-        }
+        const result = await TrainingPlans.deleteTrainingPlan(id, trainingPlanId)
+        if(!result) return res.status(400).json({ message: 'Training plan has not been deleted'});
+
+        return res.status(200).json({ messaga: 'Training plan has been deleted'});
     } catch (error) {
-        console.error(`Error while deleting training plan for ${email}`);
-        return {
-            status: false, 
-            message: `Error while deleting training plan for ${email}`
-        }
+        console.error(`Deleting training plan for ${email} failed: `, error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 }
 
-export async function updateTrainingPlan(email, trainingPlanId, name, description, days_per_week, thumbnail_image, is_current_plan){
+export async function updateTrainingPlan(req, res){
+    const { email, id } = req.user;
     try {
-        const userData = await Users.checkUserByEmail(email);
-        if(!userData.success){
-            console.log(`Can't find ${email} in db`);
-            return {
-                status: false,
-                message: `Can't find ${email} in db`
-            }
-        }
+        const { 
+            trainingPlanId,
+            name, 
+            description, 
+            days_per_week, 
+            thumbnail_image, 
+            is_current_plan 
+        } = req.body;
+
+        if (!email || !trainingPlanId || !name) return res.status(400).json({ message: 'Missing required fields' });
 
         // If new plan is current delete other current plans
-        if(is_current_plan){
-            await TrainingPlans.deleteAllCurrentTrainingPlans(userData.data.user_id);
-        }
+        if(is_current_plan) await TrainingPlans.deleteAllCurrentTrainingPlans(userData.data.user_id);
 
         const result = await TrainingPlans.updateTrainingPlan(trainingPlanId, name, description, days_per_week, thumbnail_image, is_current_plan)
-        return {
-            status: !!result,
-            message: !!result 
-                ? `Training plan for ${email} has been updated`
-                : `Training plan for ${email} has not been updated for some reason`
-        }
+        if(!result) return res.status(400).json({ message: `Training plan with id ${id} has not been updated`});
+        
+        return res.status(200).json({ message: `Training plan with id ${id} has been updated`});
     } catch (error) {
-        console.error(`Error while deleting training plan for ${email}`);
-        return {
-            status: false, 
-            message: `Error while updating training plan for ${email}`
-        }
+        console.error(`Updating training plan with id ${email} failed: `, error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 }

@@ -1,9 +1,10 @@
 import express from 'express'
 import { authenticateToken } from '../../middleware/authenticateToken.js'; 
-import { getAllExercisesFromLibrary, updateExerciseInLibrary, deleteExerciseFromLibrary, addExerciseToLibrary } from '../../controllers/trainings/trainingLibraryController.js';
+import { getAllExercisesFromLibrary, updateExerciseInLibrary, deleteExerciseFromLibrary, addExerciseToLibrary, getCategories } from '../../controllers/trainings/trainingLibraryController.js';
 
 const router = express.Router();
 
+router.get('/categories', authenticateToken, getCategories);
 router.get('/getAllExercises', authenticateToken, async (req, res) => {
     try {
         const { muscle_group } = req.query;

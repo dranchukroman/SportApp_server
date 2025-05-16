@@ -6,7 +6,6 @@ class exerciseLibrary {
       await db.connect();
     }
   }
-
   static async addExerciseToLibrary(name, muscle_group, equipment, difficulty, video_url, instructions){
     try {
       const result = await db.query(`
@@ -27,28 +26,27 @@ class exerciseLibrary {
       return false
     }
   }
-
   static async getAllExercisesFromLibrary(muscle_group){
     try {
       const result = await db.query(`
         SELECT * FROM exercise_library 
           WHERE muscle_group = $1;
-      `, [
-        muscle_group
-      ]);
+      `, [muscle_group]);
 
       return result.rows;
     } catch (error) {
-      console.log('Error while getting all exercises from library: ', error);
-      return false
+      throw error('Error while getting all exercises from library: ', error);
     }
   }
-
   static async updateExerciseInLibrary(exercise_id, name, muscle_group, equipment, difficulty, video_url, instructions){
     try {
       const result = await db.query(`
         UPDATE exercise_library 
-          SET name = $1, muscle_group = $2, equipment = $3, difficulty = $4, video_url = $5, instructions = $6 
+          SET name = $1, muscle_group = $2, 
+              equipment = $3, 
+              difficulty = $4, 
+              video_url = $5, 
+              instructions = $6 
           WHERE exercise_id = $7;
       `, [
         name, 
@@ -66,7 +64,6 @@ class exerciseLibrary {
       return false
     }
   }
-
   static async deleteExercieFromLibrary(exercise_id){
     try {
       const result = await db.query(`
@@ -82,5 +79,4 @@ class exerciseLibrary {
     }
   }
 }
-
 export default exerciseLibrary;

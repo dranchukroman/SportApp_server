@@ -4,8 +4,9 @@ import loginRoutes from './routes/user/loginRoutes.js';
 import trainingsRoutes from './routes/trainings/trainingPlansRoutes.js';
 import trainingDaysRoutes from './routes/trainings/trainingDaysRoutes.js';
 import exercisesInDay from './routes/trainings/trainingDayExerciseRoutes.js'
-import exerciseLibrary from './routes/trainings/trainingLibraryRoutes.js'
+import exerciseLibrary from './routes/trainings/exerciseLibraryRoutes.js'
 import userProfile from './routes/user/userRoutes.js'
+import { errorHandler } from './middleware/errorHandler.js';
 import bodyParser from "body-parser";
 import dotenv from 'dotenv';
 dotenv.config();
@@ -17,6 +18,8 @@ const PORT = process.env.PORT;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(express.json());
+
+app.use(errorHandler);
 
 app.use(cors({
   origin: [

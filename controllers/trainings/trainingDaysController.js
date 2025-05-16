@@ -1,82 +1,116 @@
 import TrainingDays from "../../services/trainings/trainingDays.js";
+import TrainingPlans from "../../services/trainings/trainingPlans.js";
+import { ApiError } from "../../utils/api/ApiError.js";
+import { ApiSuccess } from "../../utils/api/ApiSuccess.js";
+import { getMissingFields } from "../../utils/api/getMissingFields.js";
 
-export async function getAllTrainingDays(req, res){
+export async function getAllTrainingDays(req, res, next) {
     const { trainingPlanId } = req.query;
     try {
-        if (!trainingPlanId) return res.status(400).json({ message: 'Missing required fields' });
+        if (!trainingPlanId) {
+            throw new ApiError(400, `Missing required fields: trainingPlanId`);
+        };
 
-        const result = await TrainingDays.getAllTrainingDaysInTrainingPlan(trainingPlanId);
-        if(!result) res.status(404).json({ trainingPlanId: trainingPlanId, trainingDaysData: null, message: `Can't get training days for ${trainingPlanId}`})
+        const planExist = await TrainingPlans.checkIfPlanExist(trainingPlanId);
+        if (!planExist) {
+            throw new ApiError(404, `Plan with id ${trainingPlanId} not found`);
+        }
 
-        return res.status(200).json({ trainingPlanId: trainingPlanId, trainingDaysData: result })
+        const trainingDays = await TrainingDays.getAllTrainingDaysInTrainingPlan(trainingPlanId);
+
+        return ApiSuccess(res, 200, { trainingPlanId, trainingDays }, 'Days have been retrieved')
     } catch (error) {
-        console.error(`Getting days for training plan with id ${trainingPlanId} failed: `, error);
-        res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
 
-export async function getTrainingDayData(req, res){
+export async function getTrainingDayData(req, res, next) {
     const { trainingDayId } = req.query;
     try {
-        if (!trainingDayId) return res.status(400).json({ message: 'Missing required fields' });
+        if (!trainingDayId) {
+            throw new ApiError(400, `Missing required fields: trainingDayId`);
+        };
 
-        const result = await TrainingDays.getTrainingDayById(trainingDayId);
-        if(!result) return res.status(404).json({ trainingDayId: trainingDayId, trainingDaysData: null, message: `Getting training day data failed` })
+        const dayExist = await TrainingDays.checkIfDayExist(trainingDayId);
+        if (!dayExist) {
+            throw new ApiError(404, `Day with id ${trainingDayId} not found`);
+        }
 
-        return res.status(200).json({ trainingDayId: trainingDayId, trainingDaysData: result });
+        const trainingDay = await TrainingDays.getTrainingDayById(trainingDayId);
+
+        return ApiSuccess(res, 200, { trainingDayId, trainingDay, }, 'Day retrieved successfully')
     } catch (error) {
-        console.error(`Getting days data with id ${trainingDayId} failed: `, error);
-		return res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
 
-export async function addTrainiDayToTrainingPlan(req, res){
+export async function addTrainingDayToTrainingPlan(req, res, next) {
     const { trainingPlanId, dayName, dayDescription } = req.body;
     try {
-        if (!trainingPlanId || !dayName) return res.status(400).json({ message: 'Missing required fields' });
+        const missingFields = getMissingFields(req.body, ['trainingPlanId', 'dayName']);
+        if (missingFields.length > 0) {
+            throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
+        };
 
-        const result = TrainingDays.addNewTrainingDayToTrainingPlan(trainingPlanId, dayName, dayDescription, 1);
-        if(!result) return res.status(404).json({ trainingPlanId: trainingPlanId, status: result, message: 'Adding training plan failed' });
+        const planExist = await TrainingPlans.checkIfPlanExist(trainingPlanId);
+        if (!planExist) {
+            throw new ApiError(404, `Plan with id ${trainingPlanId} not found`);
+        }
 
-	    return res.status(200).json({ trainingPlanId: trainingPlanId, status: result, message: 'New training day has been added successfylly' });
+        const insertedDayId = await TrainingDays.addNewTrainingDayToTrainingPlan(trainingPlanId, dayName, dayDescription, 1); // 1 is to order list
+        if (!insertedDayId) {
+            throw new ApiError(500, `Training day has not been added`);
+        };
+
+        return ApiSuccess(res, 201, { trainingPlanId, trainingDayId: insertedDayId }, 'Training day has been added');
     } catch (error) {
-        console.error(`Adding day for training plan with id ${trainingPlanId} failed: `, error);
-        return res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
 
-export async function updateTrainignDay(req, res){
+export async function updateTrainignDay(req, res, next) {
     const { day_id, dayName, dayDescription } = req.body;
     try {
-        if (!day_id || !dayName || !dayDescription) return res.status(400).json({ message: 'Missing required fields' });
+        const missingFields = getMissingFields(req.body, ['day_id', 'dayName']);
+        if (missingFields.length > 0) {
+            throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
+        };
 
-        const result = TrainingDays.updateTrainingDayInTrainingPlan(day_id, dayName, dayDescription, 1);
-        if(!result) return res.status(404).json({ day_id: day_id, status: result, message: 'Training plan has not been updated' });
+        const dayExist = await TrainingDays.checkIfDayExist(day_id);
+        if (!dayExist) {
+            throw new ApiError(404, `Day with id ${day_id} not found`);
+        }
 
-        return res.status(200).json({ day_id: day_id, status: result })
+        const result = await TrainingDays.updateTrainingDayInTrainingPlan(day_id, dayName, dayDescription, 1); // 1 is to order list
+        if (!result) {
+            throw new ApiError(500, `Training day has not been updated`);
+        };
+
+        return ApiSuccess(res, 200, { day_id }, 'Training day has been updated');
     } catch (error) {
-        console.error(`Updating day with id ${day_id} failed: `, error);
-        res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
 
-export async function deleteTrainingDay(day_id){
+export async function deleteTrainingDay(req, res, next) {
+    const { day_id } = req.body;
     try {
-        const result = TrainingDays.deleteTrainingDayFromTrainingPlan(day_id);
+        if (!day_id) {
+            throw new ApiError(400, `Missing required fields: day_id`);
+        };
 
-        return {
-            status: !!result,
-            message: result 
-                ? `Training day for training plan ${day_id} has been deleted correctly`
-                : `Training day for training plan ${day_id} has not been deleted due some error`
+        const dayExist = await TrainingDays.checkIfDayExist(day_id);
+        if (!dayExist) {
+            throw new ApiError(404, `Day with id ${day_id} not found`);
         }
+
+        const result = await TrainingDays.deleteTrainingDayFromTrainingPlan(day_id);
+        if(!result){
+            throw new ApiError(500, `Day with id ${day_id} has not been deleted`);
+        }
+
+        return ApiSuccess(res, 200, day_id, 'Day has been deleted');
     } catch (error) {
-        console.error(`Error while deleting training day for ${day_id}`);
-        return {
-            status: false,
-            data: null,
-            message: `Error while deleting training day for ${day_id}`,
-            errMessage: error
-        }
+        next(error);
     }
 }

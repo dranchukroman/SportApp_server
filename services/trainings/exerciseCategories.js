@@ -1,12 +1,6 @@
 import db from '../config/db.js';
 
 class ExericeCategories {
-  static async connect() {
-    if (!db._connected) {
-      await db.connect();
-    }
-  }
-
   static async addNewExerciseCategory(name, description){
     try {
       const result = await db.query(`
@@ -19,8 +13,7 @@ class ExericeCategories {
 
       return true;
     } catch (error) {
-      console.log(`Error while adding new exercise category: `, error);
-      return false;
+      throw error;
     }
   }
 
@@ -32,8 +25,7 @@ class ExericeCategories {
 
       return result.rows;
     } catch (error) {
-      console.log(`Error while getting all exercise categories: `, error);
-      return false;
+      throw error;
     }
   }
 
@@ -50,8 +42,7 @@ class ExericeCategories {
       ]);
       return true;
     } catch (error) {
-      console.log(`Error while updating exercise category: `, error);
-      return false;
+      throw error;
     }
   }
 
@@ -65,8 +56,7 @@ class ExericeCategories {
 
       return true;
     } catch (error) {
-      console.log(`Error while deleting exercise category`, error);
-      return false;
+      throw error;
     }
   }
 }

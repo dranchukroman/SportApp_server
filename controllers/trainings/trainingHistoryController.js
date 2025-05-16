@@ -1,110 +1,103 @@
-import TrainignHistory from "../../services/trainings/trainingHistory";
+import TrainingHistory from "../../services/trainings/trainingHistory";
+import { ApiError } from '../../utils/api/ApiError.js'
+import { ApiSuccess } from "../../utils/api/ApiSuccess.js";
+import { getMissingFields } from "../../utils/api/getMissingFields.js";
 
-export async function getAllTrainingRecords(req, res) {
+export async function getAllTrainingRecords(req, res, next) {
     const { id } = req.user;
     try {
-        if(!id) return res.status(400).json({ message: 'Missed require fields'});
+        const records = await TrainingHistory.getAllRecordsFromTrainingHistory(id);
 
-        const records = await TrainignHistory.getAllRecordsFromTrainingHistory(id);
-
-        return res.status(200).json({
-            message: 'Exercise records fetched successfully',
-            data: records || []
-        });
+        return ApiSuccess(res, 200, records, 'All training records has been retrieved');
     } catch (error) {
-        console.error(`Getting all training record for ${id} failed: `, error);
-        return res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
 
-export async function getHistoryRecordByExercise(req, res){
+export async function getHistoryRecordByExercise(req, res, next) {
     const { id } = req.user;
     try {
         const { exercise_id } = req.body;
-        if(!id || !exercise_id) return res.status(400).json({ message: 'Missed require fields' });
+        if (!exercise_id) {
+            throw new ApiError(400, `Missing required fields: exercise_id`);
+        };
 
-        const result = false;
+        const result = await TrainingHistory.getRecordByExercise(id, exercise_id);
 
-        return res.status(200).json({
-            message: 'Exercise records fetched successfully',
-            data: result || []
-        });
+        return ApiSuccess(res, 200, result, 'Exercise history has been retrieved');
     } catch (error) {
-        console.error(`Getting all training record for ${id} failed: `, error);
-        return res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
 
-export async function addTrainingRecord(req, res) {
+export async function addTrainingRecord(req, res, next) {
     const { id } = req.user;
+    const { plan_id,
+        day_id,
+        exercise_id,
+        date,
+        completed,
+        sets_completed,
+        reps_completed,
+        weight_used,
+        notes
+    } = req.body;
     try {
-        const { plan_id, 
-            day_id, 
-            exercise_id, 
-            date, 
-            completed, 
-            sets_completed, 
-            reps_completed, 
-            weight_used, 
-            notes } = req.body;
-        if(!id || 
-            !plan_id || 
-            !day_id || 
-            !exercise_id || 
-            !date || 
-            !completed || 
-            !sets_completed || 
-            !reps_completed || 
-            !weight_used || 
-            !notes) return res.status(400).json({ message: 'Missed require fields'});
+        const missingFields = getMissingFields(req.body, ['plan_id', 'day_id', 'exercise_id', 'date', 'completed', 'sets_completed', 'reps_completed', 'weight_used', 'notes']);
+        if (missingFields.length > 0) {
+            throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
+        };
 
-        const result = await TrainignHistory.addRecordToTrainingHistory(id, plan_id, day_id, exercise_id, date, completed, sets_completed, reps_completed, weight_used, notes);
-        if(!result) return res.status(401).json({ message: 'Training record has not been added' });
-        
-        return res.status(201).json({ message: 'Training record has been added'});
+        const result = await TrainingHistory.addRecordToTrainingHistory(id, plan_id, day_id, exercise_id, date, completed, sets_completed, reps_completed, weight_used, notes);
+        if (!result) {
+            throw new ApiError(500, `Training record has not been added`);
+        };
+
+        return ApiSuccess(res, 201, {}, 'Training record has been added');
     } catch (error) {
-        console.error(`Adding training record for ${id} failed: `, error);
-        return res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
 
-export async function updateTrainingRecord(req, res) {
-    const { id } = req.user;
+export async function updateTrainingRecord(req, res, next) {
+    const { history_id,
+        sets_completed,
+        reps_completed,
+        weight_used,
+        notes } = req.body;
     try {
-        const { history_id, 
-            sets_completed, 
-            reps_completed, 
-            weight_used, 
-            notes } = req.body;
-        if(!id ||
-            !history_id ||
-            !sets_completed || 
-            !reps_completed || 
-            !weight_used || 
-            !notes) return res.status(400).json({ message: 'Missed require fields'});
 
-        const result = await TrainignHistory.addRecordToTrainingHistory(history_id, sets_completed, reps_completed, weight_used, notes);
-        if(!result) return res.status(401).json({ message: 'Training record has not been updated' });
-        
-        return res.status(201).json({ message: 'Training record has been added'});
+        const missingFields = getMissingFields(req.body, ['history_id', 'sets_completed', 'reps_completed', 'weight_used', 'notes']);
+        if (missingFields.length > 0) {
+            throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
+        };
+
+        const result = await TrainingHistory.updateRecordInTrainingHistory(history_id, sets_completed, reps_completed, weight_used, notes);
+        if (!result) {
+            throw new ApiError(500, `Training record has not been updated`);
+        };
+
+        return ApiSuccess(res, 200, {}, 'Training record has been updated');
     } catch (error) {
-        console.error(`Updating training record for ${id} failed: `, error);
-        return res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
 
-export async function deleteTrainingRecord(req, res) {
+export async function deleteTrainingRecord(req, res, next) {
     const { id } = req.user
+    const { history_id } = req.body;
     try {
-        const { history_id } = req.body;
-        if(!id || !history_id) return res.status(400).json({ message: 'Missed require fields'});
+        if (!history_id) {
+            throw new ApiError(400, `Missing required fields: history_id`);
+        };
 
-        const result = await TrainignHistory.deleteRecordFromTrainingHistory(history_id);
-        if(!result) return res.status(404).json({ message: `Training record with id ${history_id} has not been deleted`} );
+        const result = await TrainingHistory.deleteRecordFromTrainingHistory(history_id);
+        if (!result) {
+            throw new ApiError(500, `Training record has not been deleted`);
+        };
 
-        return res.status(200).json({ message: `Training record with id ${history_id} has been deleted` })
+        return ApiSuccess(res, 200, {}, 'Training record has been deleted');
     } catch (error) {
-        console.error(`Deleting training record for ${id} failed: `, error);
-        return res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }

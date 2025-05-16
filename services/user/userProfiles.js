@@ -1,12 +1,6 @@
 import db from '../../config/db.js';
 
 class UserProfiles {
-  static async connect() {
-    if (!db._connected) {
-      await db.connect();
-    }
-  }
-
   static async addUserProfile(user_id, first_name, last_name, height, weight, age, gender, goal, activity_level) {
     try {
       const result = await db.query(`
@@ -23,10 +17,9 @@ class UserProfiles {
         goal, 
         activity_level
       ]);
-      return true; 
+      return result.rowCount > 0; 
     } catch (error) {
-      console.log(`Error while adding new user profile: `, error);
-      return false; 
+      throw error;
     }
   }
 
@@ -36,10 +29,9 @@ class UserProfiles {
         SELECT * FROM user_profiles WHERE user_id = $1;
       `, [user_id]);
 
-      return result.rows; 
+      return result.rows[0]; 
     } catch (error) {
-      console.log(`Error while getting user profile info: `, error);
-      return false; 
+      throw error;
     }
   }
 
@@ -60,10 +52,9 @@ class UserProfiles {
         goal, 
         activity_level
       ]);
-      return true; 
+      return result.rowCount > 0; 
     } catch (error) {
-      console.log(`Error while updating user profile: `, error);
-      return false; 
+      throw error;
     }
   }
 
@@ -72,11 +63,9 @@ class UserProfiles {
       const result = await db.query(`
         DELETE FROM user_profiles WHERE user_id = $1;
       `, [user_id]);
-
-      return true; 
+      return result.rowCount > 0; 
     } catch (error) {
-      console.log(`Error while deleting user profile: `, error);
-      return false; 
+      throw error;
     }
   }
 }

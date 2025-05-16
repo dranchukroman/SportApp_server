@@ -17,6 +17,10 @@ export function errorHandler(err, req, res, next) {
         response.stackTrace = err.stackTrace;
     };
 
-    console.error(`[Error] ${err.name || 'Error'}: ${err.message}`);
+    const userInfo = req.user 
+        ? `UserID: ${req.user.id}, Email: ${req.user.email}`
+        : 'Unauthenticated user';
+
+    console.error(`[Error] ${err.name || 'Error'}: ${err.message} | ${userInfo}`);
     res.status(statusCode).json(response);
 }

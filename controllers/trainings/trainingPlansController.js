@@ -1,101 +1,126 @@
 import TrainingPlans from '../../services/trainings/trainingPlans.js'
-import Users from '../../services/user/users.js';
+import { ApiError } from "../../utils/api/ApiError.js";
+import { ApiSuccess } from "../../utils/api/ApiSuccess.js";
+import { getMissingFields } from "../../utils/api/getMissingFields.js";
 
-export async function getAllTrainingPlans(req, res){
-    const { id, email } = req.user;
+export async function getAllTrainingPlans(req, res, next) {
+    const { id } = req.user;
     try {
-		if(!id || !email) return res.status(400).json({ message: 'Can not get email or id from token' });
-
         const trainingPlans = await TrainingPlans.getAllTrainingPlans(id);
-        if(trainingPlans.length === 0) return res.status(200).json({ message: `There is no training plans for ${email}`, data: null });
 
-        return res.status(200).json({ message: `Training plans for ${email}`, data: trainingPlans });
+        return ApiSuccess(res, 200, { trainingPlans }, 'Training plans data has been retrieved');
     } catch (error) {
-        console.error(`Getting training plan for ${email} failed: `, error);
-        return res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
 
-export async function getTrainingPlanById(req, res){
+export async function getTrainingPlanById(req, res, next) {
     const { trainingPlanId } = req.query;
-    const { email } = req.user;
     try {
-        if(!trainingPlanId) return res.status(401).json({ message: 'Training plan id is not defined'});
-        const response = await TrainingPlans.getTrainingPlanById(trainingPlanId);
-        if(!response) return res.status(404).json({ message: `There is no plan with id ${trainingPlanId}`, data: null});
+        if (!trainingPlanId) {
+            throw new ApiError(400, `Missing required fields: trainingPlanId`);
+        };
 
-        return res.status(200).json({ message: `Training plan with id ${trainingPlanId}`, data: response});
+        const planExist = await TrainingPlans.checkIfPlanExist(trainingPlanId);
+        if (!planExist) {
+            throw new ApiError(404, `Training plan with id ${trainingPlanId} not found`);
+        }
+
+        const trainingPlan = await TrainingPlans.getTrainingPlanById(trainingPlanId);
+        if (!trainingPlan) {
+            throw new ApiError(404, `Training plan with id ${trainingPlanId} does not exist`);
+        };
+
+        return ApiSuccess(res, 200, { trainingPlan }, 'Training plan data has been retrieved');
     } catch (error) {
-        console.error(`Error while getting training plan ${email}:`, error);
-        res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 };
 
-export async function addNewTrainingPlan(req, res){
-    const { email, id } = req.user;
+export async function addNewTrainingPlan(req, res, next) {
+    const { id } = req.user;
+    const {
+        name,
+        description,
+        days_per_week,
+        thumbnail_image,
+        is_current_plan
+    } = req.body;
     try {
-        const { 
-            name, 
-            description, 
-            days_per_week, 
-            thumbnail_image, 
-            is_current_plan 
-        } = req.body;
-
-        if (!email || !name || !id) return res.status(400).json({ message: 'Missing required fields' });
+        const missingFields = getMissingFields(req.body, ['name', 'description', 'days_per_week', 'thumbnail_image', 'is_current_plan']);
+        if (missingFields.length > 0) {
+            throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
+        };
 
         // If new plan is current delete other current plans
-        if(is_current_plan) await TrainingPlans.deleteAllCurrentTrainingPlans(id);
+        if (is_current_plan) await TrainingPlans.deleteAllCurrentTrainingPlans(id);
 
         const newPlanId = await TrainingPlans.addNewTrainingPlan(id, name, description, days_per_week, thumbnail_image, is_current_plan);
-        if(!newPlanId) return res.status(404).json({ message: 'Creating training plan failed'});
+        if (!newPlanId) {
+            throw new ApiError(500, `Exercise has not been added`);
+        };
 
-        return res.status(200).json({ message: 'New training plan has been created', planId: newPlanId });
+        return ApiSuccess(res, 201, { planId: newPlanId }, 'Training plan has been created');
     } catch (error) {
-        console.error(`Adding training plan for ${email} failed: `, error);
-        return res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
 
-export async function deleteTrainingPlan(req, res){
-    const { email, id } = req.user
+export async function deleteTrainingPlan(req, res, next) {
+    const { id } = req.user
+    const { trainingPlanId } = req.body;
     try {
-        const { trainingPlanId } = req.body;
-        if (!email || !trainingPlanId) return res.status(400).json({ message: 'Missing required fields' });
+        if (!trainingPlanId) {
+            throw new ApiError(400, `Missing required fields: trainingPlanId`);
+        };
 
-        const result = await TrainingPlans.deleteTrainingPlan(id, trainingPlanId)
-        if(!result) return res.status(400).json({ message: 'Training plan has not been deleted'});
+        const planExist = await TrainingPlans.checkIfPlanExist(trainingPlanId);
+        if (!planExist) {
+            throw new ApiError(404, `Training plan with id ${day_id} not found`);
+        }
 
-        return res.status(200).json({ messaga: 'Training plan has been deleted'});
+        const result = await TrainingPlans.deleteTrainingPlan(id, trainingPlanId);
+        if (!result) {
+            throw new ApiError(500, `Training plan with id ${trainingPlanId} has not been deleted`);
+        };
+
+        return ApiSuccess(res, 200, {}, 'Training plan has been deleted');
     } catch (error) {
-        console.error(`Deleting training plan for ${email} failed: `, error);
-        return res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }
 
-export async function updateTrainingPlan(req, res){
-    const { email, id } = req.user;
-    try {
-        const { 
-            trainingPlanId,
-            name, 
-            description, 
-            days_per_week, 
-            thumbnail_image, 
-            is_current_plan 
-        } = req.body;
+export async function updateTrainingPlan(req, res, next) {
+    const { id } = req.user;
+    const {
+        trainingPlanId,
+        name,
+        description,
+        days_per_week,
+        thumbnail_image,
+        is_current_plan
+    } = req.body;
+    try {        
+        const missingFields = getMissingFields(req.body, ['trainingPlanId', 'name', 'description', 'days_per_week', 'thumbnail_image', 'is_current_plan']);
+        if (missingFields.length > 0) {
+            throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
+        };
 
-        if (!email || !trainingPlanId || !name) return res.status(400).json({ message: 'Missing required fields' });
+        const planExist = await TrainingPlans.checkIfPlanExist(trainingPlanId);
+        if (!planExist) {
+            throw new ApiError(404, `Training plan with id ${day_id} not found`);
+        }
 
         // If new plan is current delete other current plans
-        if(is_current_plan) await TrainingPlans.deleteAllCurrentTrainingPlans(userData.data.user_id);
+        if (is_current_plan) await TrainingPlans.deleteAllCurrentTrainingPlans(id);
 
         const result = await TrainingPlans.updateTrainingPlan(trainingPlanId, name, description, days_per_week, thumbnail_image, is_current_plan)
-        if(!result) return res.status(400).json({ message: `Training plan with id ${id} has not been updated`});
-        
-        return res.status(200).json({ message: `Training plan with id ${id} has been updated`});
+        if (!result) {
+            throw new ApiError(500, 'Training plan has not been updated');
+        };
+
+        return ApiSuccess(res, 200, {}, 'Training plan has been updated');
     } catch (error) {
-        console.error(`Updating training plan with id ${email} failed: `, error);
-        res.status(500).json({ message: 'Internal server error' });
+        next(error);
     }
 }

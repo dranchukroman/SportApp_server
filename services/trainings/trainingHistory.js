@@ -1,12 +1,6 @@
 import db from '../config/db.js';
 
-class TrainignHistory {
-  static async connect() {
-    if (!db._connected) {
-      await db.connect();
-    }
-  }
-
+class TrainingHistory {
   static async addRecordToTrainingHistory(user_id, plan_id, day_id, exercise_id, date, completed, sets_completed, reps_completed, weight_used, notes){
     try {
         const result = await db.query(`
@@ -38,8 +32,7 @@ class TrainignHistory {
 
         return result.rowCount > 0;
     } catch (error) {
-        console.error(`Adding training record to DB for ${user_id} failed: `, error);
-        return false;
+        throw error;
     }
   }
 
@@ -49,14 +42,11 @@ class TrainignHistory {
             SELECT * FROM training_history 
             WHERE user_id = $1 
             ORDER BY date DESC;
-        `, [
-            user_id
-        ])
+        `, [user_id])
 
         return result.rows;
     } catch (error) {
-        console.error(`Getting all training records from DB for ${user_id} failed: `, error);
-        return false;
+        throw error;
     }
   }
 
@@ -70,8 +60,7 @@ class TrainignHistory {
 
         return result.rows;
     } catch (error) {
-        console.error(`Getting exercise records for ${user_id} failed: `, error);
-        return false;
+        throw error;
     }
   }
 
@@ -79,20 +68,19 @@ class TrainignHistory {
     try {
         const result = await db.query(`
             UPDATE training_history 
-                SET completed = $2, sets_completed = $3, reps_completed = $4, weight_used = $5, notes = $6 
-                WHERE history_id = $1;
+                SET completed = true, sets_completed = $1, reps_completed = $2, weight_used = $3, notes = $4 
+                WHERE history_id = $5;
         `, [
-            history_id, 
             sets_completed, 
             reps_completed, 
             weight_used, 
-            notes
+            notes,
+            history_id
         ])
 
         return result.rowCount > 0;
     } catch (error) {
-        console.error(`Updating training record with id ${history_id} in DB failed: `, error);
-        return false;
+        throw error;
     }
   }
 
@@ -100,16 +88,13 @@ class TrainignHistory {
     try {
         const result = await db.query(`
             DELETE FROM training_history WHERE history_id = $1;
-        `, [
-            history_id
-        ])
+        `, [history_id]);
 
         return result.rowCount > 0;
     } catch (error) {
-        console.error(`Deleting training record with id ${history_id} from DB failed: `, error);
-        return false;
+        throw error;
     }
   }
 }
 
-export default TrainignHistory;
+export default TrainingHistory;

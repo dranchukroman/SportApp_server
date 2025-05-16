@@ -1,4 +1,4 @@
-import DayExercises from "../../models/trainings/dayExercises.js";
+import DayExercises from "../../services/trainings/dayExercises.js";
 
 export async function getExercisesInDay(req, res){
     const { day_id } = req.query;

@@ -1,4 +1,4 @@
-import TrainignHistory from "../../models/trainings/trainingHistory";
+import TrainignHistory from "../../services/trainings/trainingHistory";
 
 export async function getAllTrainingRecords(req, res) {
     const { id } = req.user;

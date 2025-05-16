@@ -1,4 +1,4 @@
-import exerciseLibrary from "../../models/trainings/exerciseLibrary.js";
+import exerciseLibrary from "../../services/trainings/exerciseLibrary.js";
 import { ApiError } from '../../utils/api/ApiError.js'
 
 export async function getAllExercisesFromLibrary(req, res) {

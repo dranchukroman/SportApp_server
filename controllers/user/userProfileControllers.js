@@ -1,4 +1,4 @@
-import UserProfiles from '../../models/user/userProfiles.js';
+import UserProfiles from '../../services/user/userProfiles.js';
 
 // Create user profile
 export async function createUserProfile(req, res) {

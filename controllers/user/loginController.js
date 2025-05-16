@@ -1,4 +1,4 @@
-import Users from '../../models/user/users.js';
+import Users from '../../services/user/users.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt'; // Hashing passwords
 import { generateCode, storeCode, verifyCode, deleteCode, getCodeData } from '../../utils/codeStorage.js';

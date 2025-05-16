@@ -1,5 +1,5 @@
-import TrainingPlans from '../../models/trainings/trainingPlans.js'
-import Users from '../../models/user/users.js';
+import TrainingPlans from '../../services/trainings/trainingPlans.js'
+import Users from '../../services/user/users.js';
 
 export async function getAllTrainingPlans(req, res){
     const { id, email } = req.user;

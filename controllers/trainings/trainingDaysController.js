@@ -1,4 +1,4 @@
-import TrainingDays from "../../models/trainings/trainingDays.js";
+import TrainingDays from "../../services/trainings/trainingDays.js";
 
 export async function getAllTrainingDays(req, res){
     const { trainingPlanId } = req.query;

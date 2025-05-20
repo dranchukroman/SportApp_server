@@ -1,15 +1,22 @@
-import nodemailer from 'nodemailer'
+import trainsporter from '../config/email.js';
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-export async function sendCode(email, mailOptions) {
+export async function sendEmailWithVerificationCode(email, code) {
   try {
+    const mailOptions = {
+      from: `"Sport App" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Your Verification Code',
+      text: `Your verification code is: ${code}`,
+      html: `
+            <div style="font-family: sans-serif;">
+            <h2>Email Verification</h2>
+            <p>Your verification code is:</p>
+            <h3 style="color: #007bff;">${code}</h3>
+            <p>This code will expire in 10 minutes.</p>
+            </div>
+          `,
+    };
+
     const result = await transporter.sendMail(mailOptions);
     console.log(`Verification code sent to ${email}`);
     return result.accepted.length > 0;

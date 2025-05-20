@@ -1,7 +1,7 @@
 import Users from '../../services/user/users.js';
 import jwt from 'jsonwebtoken';
-import { generateCode, storeCode, verifyCode, deleteCode } from '../../utils/codeStorage.js';
-import { sendCode } from '../../utils/emailService.js'
+import { generateCode, storeCode, verifyCode, deleteCode } from '../../utils/verificationCode.js';
+import { sendEmailWithVerificationCode } from '../../utils/emailService.js'
 import { ApiError } from "../../utils/api/ApiError.js";
 import { ApiSuccess } from "../../utils/api/ApiSuccess.js";
 import { getMissingFields } from "../../utils/api/getMissingFields.js";
@@ -82,22 +82,7 @@ export async function sendVerificationCode(req, res, next) {
 
 		const code = generateCode();
 
-		const mailOptions = {
-			from: `"Sport App" <${process.env.EMAIL_USER}>`,
-			to: email,
-			subject: 'Your Verification Code',
-			text: `Your verification code is: ${code}`,
-			html: `
-			  <div style="font-family: sans-serif;">
-				<h2>Email Verification</h2>
-				<p>Your verification code is:</p>
-				<h3 style="color: #007bff;">${code}</h3>
-				<p>This code will expire in 10 minutes.</p>
-			  </div>
-			`,
-		};
-
-		const isDelivered = await sendCode(email, mailOptions);
+		const isDelivered = await sendEmailWithVerificationCode(email, code);
 		if (!isDelivered) {
 			throw new ApiError(500, 'Sending verification code failed');
 		}

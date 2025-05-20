@@ -34,8 +34,6 @@ app.use(cors({
   origin: function (origin, callback) {
     const env = process.env.NODE_ENV || 'development';
     const isAllowed = allowedOrigins[env].includes(origin);
-
-    // Якщо запит приходить без origin (наприклад, з Postman) — також дозволити
     if (!origin || isAllowed) {
       callback(null, true);
     } else {
@@ -54,6 +52,14 @@ app.use('/api', trainingDaysRoutes);
 app.use('/api', exercisesInDay);
 app.use('/api', exerciseLibrary);
 app.use('/api', userProfile);
+
+// CORS logginning
+app.use((err, req, res, next) => {
+  if (err.message && err.message.startsWith('❌ Not allowed by CORS')) {
+    return res.status(403).json({ message: 'CORS Error: Origin not allowed' });
+  }
+  next(err);
+});
 
 app.use(errorHandler);
 app.listen(PORT, "0.0.0.0", () => {

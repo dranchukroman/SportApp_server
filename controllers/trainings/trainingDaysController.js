@@ -70,7 +70,8 @@ export async function addTrainingDayToTrainingPlan(req, res, next) {
 }
 
 export async function updateTrainignDay(req, res, next) {
-    const { day_id, dayName, dayDescription } = req.body;
+    const day_id = Number(req.body.day_id)
+    const { dayName, dayDescription } = req.body;
     try {
         const missingFields = getMissingFields(req.body, ['day_id', 'dayName']);
         if (missingFields.length > 0) {

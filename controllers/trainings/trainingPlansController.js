@@ -15,7 +15,7 @@ export async function getAllTrainingPlans(req, res, next) {
 }
 
 export async function getTrainingPlanById(req, res, next) {
-    const { trainingPlanId } = req.query;
+    const trainingPlanId = Number(req.query.trainingPlanId);
     try {
         if (!trainingPlanId) {
             throw new ApiError(400, `Missing required fields: trainingPlanId`);

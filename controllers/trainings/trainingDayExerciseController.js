@@ -5,7 +5,7 @@ import { ApiSuccess } from "../../utils/api/ApiSuccess.js";
 import { getMissingFields } from "../../utils/api/getMissingFields.js";
 
 export async function getExercisesInDay(req, res, next) {
-    const { day_id } = req.query;
+    const day_id = Number(req.query.day_id);
     console.log(day_id)
     try {
         if (!day_id) {

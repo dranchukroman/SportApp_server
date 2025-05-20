@@ -84,7 +84,6 @@ export async function updateTrainingRecord(req, res, next) {
 }
 
 export async function deleteTrainingRecord(req, res, next) {
-    const { id } = req.user
     const { history_id } = req.body;
     try {
         if (!history_id) {

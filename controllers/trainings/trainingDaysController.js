@@ -5,7 +5,7 @@ import { ApiSuccess } from "../../utils/api/ApiSuccess.js";
 import { getMissingFields } from "../../utils/api/getMissingFields.js";
 
 export async function getAllTrainingDays(req, res, next) {
-    const { trainingPlanId } = req.query;
+    const trainingPlanId = Number(req.query.trainingPlanId);
     try {
         if (!trainingPlanId) {
             throw new ApiError(400, `Missing required fields: trainingPlanId`);
@@ -18,14 +18,14 @@ export async function getAllTrainingDays(req, res, next) {
 
         const trainingDays = await TrainingDays.getAllTrainingDaysInTrainingPlan(trainingPlanId);
 
-        return ApiSuccess(res, 200, { trainingPlanId, trainingDays }, 'Days have been retrieved')
+        return ApiSuccess(res, 200, { trainingPlanId, trainingDays }, 'Training days have been retrieved')
     } catch (error) {
         next(error);
     }
 }
 
 export async function getTrainingDayData(req, res, next) {
-    const { trainingDayId } = req.query;
+    const trainingDayId = Number(req.query.trainingDayId);
     try {
         if (!trainingDayId) {
             throw new ApiError(400, `Missing required fields: trainingDayId`);
@@ -38,14 +38,15 @@ export async function getTrainingDayData(req, res, next) {
 
         const trainingDay = await TrainingDays.getTrainingDayById(trainingDayId);
 
-        return ApiSuccess(res, 200, { trainingDayId, trainingDay, }, 'Day retrieved successfully')
+        return ApiSuccess(res, 200, { trainingDayId, trainingDay, }, 'Training day retrieved successfully')
     } catch (error) {
         next(error);
     }
 }
 
 export async function addTrainingDayToTrainingPlan(req, res, next) {
-    const { trainingPlanId, dayName, dayDescription } = req.body;
+    const trainingPlanId = Number(req.body.trainingPlanId);
+    const { dayName, dayDescription } = req.body;
     try {
         const missingFields = getMissingFields(req.body, ['trainingPlanId', 'dayName']);
         if (missingFields.length > 0) {
@@ -109,7 +110,7 @@ export async function deleteTrainingDay(req, res, next) {
             throw new ApiError(500, `Day with id ${day_id} has not been deleted`);
         }
 
-        return ApiSuccess(res, 200, day_id, 'Day has been deleted');
+        return ApiSuccess(res, 200, day_id, 'Training day has been deleted');
     } catch (error) {
         next(error);
     }

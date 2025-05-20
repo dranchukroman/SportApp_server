@@ -19,7 +19,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(express.json());
 
-app.use(errorHandler);
 
 app.use(cors({
   origin: [
@@ -41,7 +40,7 @@ app.use('/api', exercisesInDay);
 app.use('/api', exerciseLibrary);
 app.use('/api', userProfile);
 
-// Listen for all requests in local network
+app.use(errorHandler);
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });

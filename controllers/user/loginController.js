@@ -49,6 +49,13 @@ export async function registerNewUser(req, res, next) {
 			throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
 		};
 
+		// Add validation if email code has been verified
+
+		const isUserExist = await Users.checkUserByEmail(email);
+		if (isUserExist) {
+			throw new ApiError(404, `Account with email: ${email} already exist`);
+		}
+
 		const newAccountID = await Users.addNewUser(email, password);
 		if (!newAccountID) {
 			throw new ApiError(500, `Registration failed`);
@@ -112,7 +119,7 @@ export async function isUserExist(req, res, next) {
 
 		const isExist = await Users.checkUserByEmail(email);
 
-		return ApiSuccess(res, 200, { isExist }, `User ${isExist ? '' : 'do not '}`)
+		return ApiSuccess(res, 200, { isExist }, `User ${isExist ? '' : 'do not '}exist`)
 	} catch (error) {
 		next(error);
 	}
@@ -185,12 +192,12 @@ export async function deleteUser(req, res, next) {
 	}
 }
 
-export async function checkToken (req, res, next){
+export async function checkToken(req, res, next) {
 	try {
 		const tokenStatus = req.user?.email
 			? true
 			: false
-		return ApiSuccess(res, 200, { tokenStatus }, `Token is${!tokenStatus ? ' not' : null} valid`);
+		return ApiSuccess(res, 200, { tokenStatus }, `Token is${!tokenStatus ? ' not' : ''} valid`);
 	} catch (error) {
 		next(error);
 	}

@@ -107,7 +107,7 @@ export async function deleteExerciseFromLibrary(req, res, next) {
             throw new ApiError(500, 'Exercise in library has not been deleted');
         }
 
-        return ApiSuccess(res, 200, {}, 'Exercise has been deleted to library')
+        return ApiSuccess(res, 200, {}, 'Exercise has been deleted from library')
     } catch (error) {
         next(error);
     }

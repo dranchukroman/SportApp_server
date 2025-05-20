@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/trainingPlans', authenticateToken, getAllTrainingPlans);
 router.get('/trainingPlan', authenticateToken, getTrainingPlanById);
 router.post('/addTrainingPlan', authenticateToken, addNewTrainingPlan);
-router.delete('/deleteTrainingPlan', authenticateToken, deleteTrainingPlan);
 router.put('/updateTrainingPlan', authenticateToken, updateTrainingPlan);
+router.delete('/deleteTrainingPlan', authenticateToken, deleteTrainingPlan);
 
 export default router;

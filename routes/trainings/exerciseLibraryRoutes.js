@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/categories', authenticateToken, getCategories);
 router.get('/getAllExercises', authenticateToken, getAllExercisesFromLibrary);
 router.post('/addExerciseToLibrary', authenticateToken, addExerciseToLibrary);
-router.put('/updateExerciseToLibrary', authenticateToken, updateExerciseInLibrary);
-router.delete('/deleteExerciseToLibrary', authenticateToken, deleteExerciseFromLibrary);
+router.put('/updateExerciseInLibrary', authenticateToken, updateExerciseInLibrary);
+router.delete('/deleteExerciseFromLibrary', authenticateToken, deleteExerciseFromLibrary);
 
 export default router;

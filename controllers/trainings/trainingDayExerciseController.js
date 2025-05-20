@@ -6,6 +6,7 @@ import { getMissingFields } from "../../utils/api/getMissingFields.js";
 
 export async function getExercisesInDay(req, res, next) {
     const { day_id } = req.query;
+    console.log(day_id)
     try {
         if (!day_id) {
             throw new ApiError(400, `Missing required fields: day_id`);
@@ -25,7 +26,7 @@ export async function getExercisesInDay(req, res, next) {
 }
 
 export async function getExerciseById(req, res, next) {
-    const { exerciseId } = req.query;
+    const exerciseId = Number(req.query.exerciseId);
     try {
         if (!exerciseId) {
             throw new ApiError(400, `Missing required fields: exerciseId`);
@@ -94,7 +95,7 @@ export async function updateExercisesInDay(req, res, next) {
 
         const exerciseExist = await DayExercises.checkIfExerciseExist(day_exercise_id);
         if (!exerciseExist) {
-            throw new ApiError(404, `Day with id ${day_id} not found`);
+            throw new ApiError(404, `Exercise with id ${day_exercise_id} not found`);
         }
 
         const result = await DayExercises.updateExerciseInDay(muscle_group, rest_time, sets, reps, weight, day_exercise_id, exercise_id, description);
@@ -117,7 +118,7 @@ export async function deleteExercisesInDay(req, res, next) {
 
         const exerciseExist = await DayExercises.checkIfExerciseExist(day_exercise_id);
         if (!exerciseExist) {
-            throw new ApiError(404, `Day with id ${day_id} not found`);
+            throw new ApiError(404, `Day with id ${day_exercise_id} not found`);
         }
 
         const result = await DayExercises.deleteExerciseInDay(day_exercise_id)

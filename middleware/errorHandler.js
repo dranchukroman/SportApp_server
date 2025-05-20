@@ -1,6 +1,5 @@
 export function errorHandler(err, req, res, next) {
     const isProd = process.env.NODE_ENV === 'production';
-
     const statusCode = err.statusCode || 500;
     const message = isProd 
         ? (statusCode === 500 ? 'Internal server error' : err.message)
@@ -13,7 +12,7 @@ export function errorHandler(err, req, res, next) {
     }
 
     if(!isProd){
-        response.stack = err.stack;
+        response.stack = err.stack.replace(/\n\s+/g, ' | ');;
         response.stackTrace = err.stackTrace;
     };
 

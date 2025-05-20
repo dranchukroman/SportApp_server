@@ -76,7 +76,7 @@ export async function deleteTrainingPlan(req, res, next) {
 
         const planExist = await TrainingPlans.checkIfPlanExist(trainingPlanId);
         if (!planExist) {
-            throw new ApiError(404, `Training plan with id ${day_id} not found`);
+            throw new ApiError(404, `Training plan with id ${trainingPlanId} not found`);
         }
 
         const result = await TrainingPlans.deleteTrainingPlan(id, trainingPlanId);

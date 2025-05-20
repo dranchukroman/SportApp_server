@@ -1,4 +1,4 @@
-import db from '../config/db.js';
+import db from '../config/pgConfig.js';
 
 class TrainingHistory {
   static async addRecordToTrainingHistory(user_id, plan_id, day_id, exercise_id, date, completed, sets_completed, reps_completed, weight_used, notes){

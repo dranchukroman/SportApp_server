@@ -1,4 +1,4 @@
-import db from '../../config/db.js';
+import db from '../../config/pgConfig.js';
 
 class UserProfiles {
   static async addUserProfile(user_id, first_name, last_name, height, weight, age, gender, goal, activity_level) {

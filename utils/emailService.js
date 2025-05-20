@@ -1,4 +1,4 @@
-import trainsporter from '../config/email.js';
+import transporter from "../config/email.js";
 
 export async function sendEmailWithVerificationCode(email, code) {
   try {
@@ -18,7 +18,6 @@ export async function sendEmailWithVerificationCode(email, code) {
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log(`Verification code sent to ${email}`);
     return result.accepted.length > 0;
   } catch (error) {
     console.error(`Error sending email:`, error);

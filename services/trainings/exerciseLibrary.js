@@ -1,4 +1,4 @@
-import db from '../../config/db.js';
+import db from '../../config/pgConfig.js';
 
 class ExerciseLibrary {
   static async addExerciseToLibrary(name, muscle_group, equipment, difficulty, video_url, instructions){

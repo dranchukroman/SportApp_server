@@ -80,14 +80,14 @@ export async function sendVerificationCode(req, res, next) {
 			throw new ApiError(400, `Missing required fields: email`);
 		};
 
-		const code = generateCode();
+		const code = await generateCode();
 
 		const isDelivered = await sendEmailWithVerificationCode(email, code);
 		if (!isDelivered) {
 			throw new ApiError(500, 'Sending verification code failed');
 		}
 
-		storeCode(email, code); // add code to storage
+		await storeCode(email, code); // add code to storage
 
 		return ApiSuccess(res, 200, { isDelivered }, 'Verification code has been send');
 	} catch (error) {
@@ -119,12 +119,12 @@ export async function codeVerification(req, res, next) {
 			throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
 		};
 
-		const isCodeValid = verifyCode(email, verificationCode);
+		const isCodeValid = await verifyCode(email, verificationCode);
 		if (!isCodeValid) {
 			throw new ApiError(401, 'Invalid or expired code')
 		};
 
-		deleteCode(email); // deleting code from storage
+		await deleteCode(email); // deleting code from storage
 
 		return ApiSuccess(res, 200, { isCodeValid }, 'Email verified successfully');
 	} catch (error) {

@@ -1,4 +1,4 @@
-import db from '../../config/db.js'
+import db from '../../config/pgConfig.js'
 
 class TrainingDays {
     static async checkIfDayExist(day_id) {

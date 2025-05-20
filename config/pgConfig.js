@@ -11,6 +11,8 @@ const db = new pg.Client({
   port: process.env.PG_PORT,
 });
 
-db.connect(() => console.log('Connected to DB:', process.env.PG_DATABASE));
+db.connect(() => {
+  console.log('Connected to DB:', process.env.PG_DATABASE)
+});
 
 export default db;

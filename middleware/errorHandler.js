@@ -1,6 +1,7 @@
 export function errorHandler(err, req, res, next) {
     const isProd = process.env.NODE_ENV === 'production';
     const statusCode = err.statusCode || 500;
+    console.log(isProd)
     const message = isProd 
         ? (statusCode === 500 ? 'Internal server error' : err.message)
         : err.message

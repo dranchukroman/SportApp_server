@@ -19,16 +19,31 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(express.json());
 
-
-app.use(cors({
-  origin: [
+const allowedOrigins = {
+  development: [
     "http://localhost:3000", 
     "http://192.168.0.106:3000", 
-    "https://sportappclient-production3.up.railway.app", 
-    'http://192.168.0.4:3000'
-  ], 
+    "http://192.168.0.4:3000"
+  ],
+  production: [
+    "https://sportappclient-production3.up.railway.app"
+  ]
+};
+
+app.use(cors({
+  origin: function (origin, callback) {
+    const env = process.env.NODE_ENV || 'development';
+    const isAllowed = allowedOrigins[env].includes(origin);
+
+    // Якщо запит приходить без origin (наприклад, з Postman) — також дозволити
+    if (!origin || isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('❌ Not allowed by CORS: ' + origin));
+    }
+  },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"], 
+  methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Authorization", "Content-Type"]
 }));
 

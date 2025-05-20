@@ -1,3 +1,4 @@
+import ExericeCategories from "../../services/trainings/exerciseCategories.js";
 import ExerciseLibrary from "../../services/trainings/exerciseLibrary.js";
 import { ApiError } from '../../utils/api/ApiError.js'
 import { ApiSuccess } from "../../utils/api/ApiSuccess.js";
@@ -24,14 +25,8 @@ export async function getAllExercisesFromLibrary(req, res, next) {
 export async function getCategories(req, res, next) {
     try {
         //Create table for categories
-        const muscleGroupsList = [
-            { id: 1, name: 'Chest', description: null, image: null },
-            { id: 2, name: 'Back', description: null, image: null },
-            { id: 3, name: 'Legs', description: null, image: null },
-            { id: 4, name: 'Shoulders', description: null, image: null },
-            { id: 5, name: 'Arms', description: null, image: null },
-            { id: 6, name: 'Core', description: null, image: null },
-        ];
+        const muscleGroupsList = await ExericeCategories.getAllExerciseCategories();
+        
         if (muscleGroupsList.length === 0) {
             throw new ApiError(500, 'Require muscle group do not exist');
         }

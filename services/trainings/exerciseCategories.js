@@ -1,4 +1,4 @@
-import db from '../config/pgConfig.js';
+import db from '../../config/pgConfig.js';
 
 class ExericeCategories {
   static async addNewExerciseCategory(name, description){

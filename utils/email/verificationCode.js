@@ -1,4 +1,4 @@
-import redis from "../config/redisConfig.js";
+import redis from "../../config/redisConfig.js";
 
 export function generateCode() {
     const code = Math.floor(Math.random() * 999999) + 1;

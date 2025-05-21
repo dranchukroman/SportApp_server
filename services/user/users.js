@@ -2,7 +2,7 @@ import db from '../../config/pgConfig.js';
 import bcrypt from 'bcrypt';
 
 class Users {
-	static async addNewUser(email, password) {
+	static async addNewUser(email, password, role) {
 		try {
 			const hashedPassword = await bcrypt.hash(password, 10);
 			const result = await db.query(`
@@ -12,7 +12,7 @@ class Users {
 			`, [email, hashedPassword]
 			);
 
-			return result.rows[0].user_id;
+			return result.rows[0];
 		} catch (error) {
 			throw error;
 		}

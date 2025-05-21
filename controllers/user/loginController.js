@@ -27,7 +27,7 @@ export async function loginUser(req, res, next) {
 		};
 
 		const token = jwt.sign(
-			{ id: userData.user_id, email },
+			{ id: userData.user_id, email, role: userData.role },
 			SECRET_KEY,
 			{ expiresIn: '3 days' }
 		);
@@ -56,13 +56,13 @@ export async function registerNewUser(req, res, next) {
 			throw new ApiError(404, `Account with email: ${email} already exist`);
 		}
 
-		const newAccountID = await Users.addNewUser(email, password);
-		if (!newAccountID) {
+		const userData = await Users.addNewUser(email, password, role);
+		if (!userData) {
 			throw new ApiError(500, `Registration failed`);
 		}
 
 		const token = jwt.sign(
-			{ id: newAccountID, email },
+			{ id: userData.user_id, email, role: userData.role },
 			SECRET_KEY,
 			{ expiresIn: '3 days' }
 		);

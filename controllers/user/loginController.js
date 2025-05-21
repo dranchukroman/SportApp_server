@@ -1,7 +1,7 @@
 import Users from '../../services/user/users.js';
 import jwt from 'jsonwebtoken';
-import { generateCode, storeCode, verifyCode, deleteCode } from '../../utils/verificationCode.js';
-import { sendEmailWithVerificationCode } from '../../utils/emailService.js'
+import { generateCode, storeCode, verifyCode, deleteCode } from '../../utils/email/verificationCode.js';
+import { sendEmailWithVerificationCode } from '../../utils/email/emailService.js'
 import { ApiError } from "../../utils/api/ApiError.js";
 import { ApiSuccess } from "../../utils/api/ApiSuccess.js";
 import { getMissingFields } from "../../utils/api/getMissingFields.js";

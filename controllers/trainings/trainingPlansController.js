@@ -47,7 +47,7 @@ export async function addNewTrainingPlan(req, res, next) {
         is_current_plan
     } = req.body;
     try {
-        const missingFields = getMissingFields(req.body, ['name', 'description', 'days_per_week', 'thumbnail_image', 'is_current_plan']);
+        const missingFields = getMissingFields(req.body, ['name', 'description', 'days_per_week', 'is_current_plan']);
         if (missingFields.length > 0) {
             throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
         };
@@ -101,7 +101,7 @@ export async function updateTrainingPlan(req, res, next) {
         is_current_plan
     } = req.body;
     try {        
-        const missingFields = getMissingFields(req.body, ['trainingPlanId', 'name', 'description', 'days_per_week', 'thumbnail_image', 'is_current_plan']);
+        const missingFields = getMissingFields(req.body, ['trainingPlanId', 'name', 'description', 'days_per_week', 'is_current_plan']);
         if (missingFields.length > 0) {
             throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
         };

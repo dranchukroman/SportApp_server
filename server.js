@@ -31,15 +31,7 @@ const allowedOrigins = {
 };
 
 app.use(cors({
-  origin: function (origin, callback) {
-    const env = process.env.NODE_ENV || 'development';
-    const isAllowed = allowedOrigins[env].includes(origin);
-    if (!origin || isAllowed) {
-      callback(null, true);
-    } else {
-      callback(new Error('❌ Not allowed by CORS: ' + origin));
-    }
-  },
+  origin: allowedOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Authorization", "Content-Type"]

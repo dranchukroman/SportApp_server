@@ -8,7 +8,7 @@ export function generateCode() {
 export async function storeCode(email, code) {
     const key = `verify:${email}`;
     const value = JSON.stringify({ code });
-    await redis.set(key, value, 'EX', 30); // Time in seconds
+    await redis.set(key, value, 'EX', 600); // Time in seconds
 }
 
 export async function getCodeData(email) {

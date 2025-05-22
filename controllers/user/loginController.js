@@ -56,6 +56,7 @@ export async function registerNewUser(req, res, next) {
 			throw new ApiError(404, `Account with email: ${email} already exist`);
 		}
 
+		const role = 'free_client'
 		const userData = await Users.addNewUser(email, password, role);
 		if (!userData) {
 			throw new ApiError(500, `Registration failed`);

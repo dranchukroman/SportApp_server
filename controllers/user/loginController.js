@@ -88,8 +88,8 @@ export async function sendVerificationCode(req, res, next) {
 			throw new ApiError(500, 'Sending verification code failed');
 		}
 
-		await storeCode(email, code); // add code to storage
-
+		await storeCode(email, code);
+		
 		return ApiSuccess(res, 200, { isDelivered }, 'Verification code has been send');
 	} catch (error) {
 		next(error);

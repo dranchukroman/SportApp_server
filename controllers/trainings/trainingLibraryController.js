@@ -12,9 +12,6 @@ export async function getAllExercisesFromLibrary(req, res, next) {
         };
 
         const exerciseList = await ExerciseLibrary.getAllExercisesFromLibrary(muscle_group)
-        if (exerciseList.length === 0) {
-            throw new ApiError(404, 'Requested exercise group does not exist');
-        }
 
         return ApiSuccess(res, 200, { exerciseList }, 'Exercise list has been retrieved');
     } catch (error) {
@@ -28,7 +25,7 @@ export async function getCategories(req, res, next) {
         const muscleGroupsList = await ExericeCategories.getAllExerciseCategories();
         
         if (muscleGroupsList.length === 0) {
-            throw new ApiError(500, 'Require muscle group do not exist');
+            throw new ApiError(500, 'Muscle group list is empty');
         }
 
         return ApiSuccess(res, 200, { muscleGroupsList }, 'Muscle group has been retrieved');

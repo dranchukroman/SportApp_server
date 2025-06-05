@@ -7,6 +7,7 @@ import exercisesInDay from './routes/trainings/trainingDayExerciseRoutes.js'
 import exerciseLibrary from './routes/trainings/exerciseLibraryRoutes.js'
 import userProfile from './routes/user/userRoutes.js'
 import trainingProgress from './routes/trainings/trainingHistoryRoutes.js'
+import statistic from './routes/user/statistic.js'
 import { errorHandler } from './middleware/errorHandler.js';
 import bodyParser from "body-parser";
 import dotenv from 'dotenv';
@@ -46,6 +47,7 @@ app.use('/api', exercisesInDay);
 app.use('/api', exerciseLibrary);
 app.use('/api', userProfile);
 app.use('/api', trainingProgress);
+app.use('/api', statistic);
 
 // CORS logginning
 app.use((err, req, res, next) => {

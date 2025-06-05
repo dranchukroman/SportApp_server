@@ -37,6 +37,9 @@ export async function getUserProfile(req, res, next) {
   const { id } = req.user;
   try {
     const profile = await UserProfiles.getUserProfileInfo(id);
+    if (!profile) {
+      throw new ApiError(500, `Profile does not exist`);
+    };
 
     return ApiSuccess(res, 200, { profile }, 'Profile has been retrieved');
   } catch (error) {

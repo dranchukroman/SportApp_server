@@ -1,7 +1,55 @@
-import TrainingHistory from "../../services/trainings/trainingHistory";
+import TrainingHistory from "../../services/trainings/trainingHistory.js";
 import { ApiError } from '../../utils/api/ApiError.js'
 import { ApiSuccess } from "../../utils/api/ApiSuccess.js";
 import { getMissingFields } from "../../utils/api/getMissingFields.js";
+import { randomUUID } from 'crypto'; // Node.js built-in
+
+export async function saveTrainingProgress(req, res, next) {
+    try {
+        const { id } = req.user;
+        const { trainingPlanId, trainingDayId, progress } = req.body;
+        const missingFields = getMissingFields(req.body, ['trainingPlanId', 'trainingDayId', 'progress']);
+        if (missingFields.length > 0) {
+            throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
+        };
+
+        if (progress.length < 1) {
+            throw new ApiError(400, `Training data can not be empty`);
+        }
+
+        const sessionId = randomUUID();
+        const notInsertedRecords = [];
+
+        for (const exercise of progress) {
+            const { exerciseId, records } = exercise;
+            
+            if (!exerciseId || !Array.isArray(records)) {
+                notInsertedRecords.push(exercise);
+                continue;
+            }
+            for (let index = 0; index < records.length; index++) {
+                const { weight, reps, note, time, date } = records[index];
+
+                const result = await TrainingHistory.addRecordToTrainingHistory(id, trainingPlanId, trainingDayId, exerciseId, date, time, reps, weight, note, index, sessionId);
+
+                if (!result) {
+                    notInsertedRecords.push(exercise);
+                }
+            }
+        }
+        if(notInsertedRecords.length === progress.length) {
+            throw new ApiError(500, `History records has not been added`);
+        }
+
+        if(notInsertedRecords > 0){
+            return ApiSuccess(res, 207, notInsertedRecords, 'This history records has not been added');
+        }
+
+        return ApiSuccess(res, 200, [], 'Training progress has been saved');
+    } catch (error) {
+        next(error);
+    }
+}
 
 export async function getAllTrainingRecords(req, res, next) {
     const { id } = req.user;
@@ -30,6 +78,7 @@ export async function getHistoryRecordByExercise(req, res, next) {
     }
 }
 
+// Not for use now
 export async function addTrainingRecord(req, res, next) {
     const { id } = req.user;
     const { plan_id,
@@ -59,6 +108,7 @@ export async function addTrainingRecord(req, res, next) {
     }
 }
 
+// Not for use now
 export async function updateTrainingRecord(req, res, next) {
     const { history_id,
         sets_completed,
@@ -83,6 +133,7 @@ export async function updateTrainingRecord(req, res, next) {
     }
 }
 
+// Not for use now
 export async function deleteTrainingRecord(req, res, next) {
     const { history_id } = req.body;
     try {

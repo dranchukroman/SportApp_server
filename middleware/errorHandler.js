@@ -12,7 +12,7 @@ export function errorHandler(err, req, res, next) {
     }
 
     if(!isProd){
-        response.stack = err.stack.replace(/\n\s+/g, ' | ');;
+        response.stack = err.stack.replace(/\n\s+/g, ' | ');
         response.stackTrace = err.stackTrace;
     };
 
@@ -20,6 +20,6 @@ export function errorHandler(err, req, res, next) {
         ? `UserID: ${req.user.id}, Email: ${req.user.email}`
         : 'Unauthenticated user';
 
-    console.error(`[Error] ${err.name || 'Error'}: ${err.message} | ${userInfo}`);
+    console.error(`[Error] ${err.name || 'Error'}: ${err.message} | ${userInfo} | ${err.stack}`);
     res.status(statusCode).json(response);
 }

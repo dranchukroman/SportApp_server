@@ -38,9 +38,15 @@ export async function workoutCompleted(req, res, next) {
 export async function fullDashboardStatistic(req, res, next) {
     const { id } = req.user;
     try {
-        const result = await Statistic.fullDbStats(id);
+        const stats = await Statistic.fullDbStats(id);
 
-        return ApiSuccess(res, 200, result, 'Exercising time has been retrived');
+        const data = {
+            total_sessions: Number(stats.total_sessions),
+            avg_sessions_per_week: Math.round(stats.avg_sessions_per_week),
+            total_training_minutes: Math.round(stats.total_training_minutes),
+        };
+
+        return ApiSuccess(res, 200, data, 'Exercising time has been retrieved');
     } catch (error) {
         next(error);
     }

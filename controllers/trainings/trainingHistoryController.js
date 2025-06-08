@@ -1,3 +1,4 @@
+import { time } from "console";
 import TrainingHistory from "../../services/trainings/trainingHistory.js";
 import { ApiError } from '../../utils/api/ApiError.js'
 import { ApiSuccess } from "../../utils/api/ApiSuccess.js";
@@ -65,13 +66,52 @@ export async function getAllTrainingRecords(req, res, next) {
 export async function getHistoryRecordByExercise(req, res, next) {
     const { id } = req.user;
     try {
-        const { exercise_id } = req.body;
+        const { exercise_id } = req.query;
         if (!exercise_id) {
             throw new ApiError(400, `Missing required fields: exercise_id`);
         };
 
-        const result = await TrainingHistory.getRecordByExercise(id, exercise_id);
+        // 1. Отримуємо плаский список з сервісу (ваш код не змінюється)
+        const flatHistory = await TrainingHistory.getRecordByExercise(id, exercise_id);
 
+        // Якщо історія порожня, одразу повертаємо результат
+        if (flatHistory.length === 0) {
+            return ApiSuccess(res, 200, [], 'Exercise history is empty.');
+        }
+
+        // 2. Групуємо дані за допомогою `reduce`
+        const groupedBySession = flatHistory.reduce((acc, set) => {
+            // `acc` - це наш акумулятор, об'єкт для сесій
+            // `set` - це один запис з `flatHistory` (один підхід)
+            const { session_id, date, ...setData } = set;
+
+            // Якщо ми ще не бачили цю сесію, створюємо для неї запис
+            if (!acc[session_id]) {
+                acc[session_id] = {
+                    session_id,
+                    date, // Беремо дату з першого підходу сесії
+                    sets: [] // Створюємо масив для підходів
+                };
+            }
+
+            // Додаємо поточний підхід (set) до масиву `sets` відповідної сесії
+            // Ми можемо додати весь об'єкт `set` або тільки потрібні поля
+            acc[session_id].sets.push({
+                history_id: setData.history_id,
+                reps_completed: setData.reps_completed,
+                weight_used: setData.weight_used,
+                notes: setData.notes,
+                time: setData.time,
+                history_index: setData.history_index
+            });
+            
+            return acc;
+        }, {});
+
+        // 3. Перетворюємо об'єкт сесій на масив і відправляємо клієнту
+        // Object.values() дасть нам масив об'єктів сесій
+        const result = Object.values(groupedBySession);
+        
         return ApiSuccess(res, 200, result, 'Exercise history has been retrieved');
     } catch (error) {
         next(error);

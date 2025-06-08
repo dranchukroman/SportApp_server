@@ -46,7 +46,8 @@ class TrainingHistory {
             const result = await db.query(`
             SELECT * FROM training_history
             WHERE user_id = $1
-            AND exercise_id = $2    
+            AND day_exercise_id = $2
+            ORDER BY date DESC, history_index;
         `, [user_id, exercise_id]);
 
             return result.rows;

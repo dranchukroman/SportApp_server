@@ -68,20 +68,20 @@ export async function addNewTrainingPlan(req, res, next) {
 
 export async function deleteTrainingPlan(req, res, next) {
     const { id } = req.user
-    const { trainingPlanId } = req.body;
+    const { planId } = req.body;
     try {
-        if (!trainingPlanId) {
-            throw new ApiError(400, `Missing required fields: trainingPlanId`);
+        if (!planId) {
+            throw new ApiError(400, `Missing required fields: planId`);
         };
 
-        const planExist = await TrainingPlans.checkIfPlanExist(trainingPlanId);
+        const planExist = await TrainingPlans.checkIfPlanExist(planId);
         if (!planExist) {
-            throw new ApiError(404, `Training plan with id ${trainingPlanId} not found`);
+            throw new ApiError(404, `Training plan with id ${planId} not found`);
         }
 
-        const result = await TrainingPlans.deleteTrainingPlan(id, trainingPlanId);
+        const result = await TrainingPlans.deleteTrainingPlan(id, planId);
         if (!result) {
-            throw new ApiError(500, `Training plan with id ${trainingPlanId} has not been deleted`);
+            throw new ApiError(500, `Training plan with id ${planId} has not been deleted`);
         };
 
         return ApiSuccess(res, 200, {}, 'Training plan has been deleted');
@@ -93,7 +93,7 @@ export async function deleteTrainingPlan(req, res, next) {
 export async function updateTrainingPlan(req, res, next) {
     const { id } = req.user;
     const {
-        trainingPlanId,
+        planId,
         name,
         description,
         days_per_week,
@@ -101,12 +101,12 @@ export async function updateTrainingPlan(req, res, next) {
         is_current_plan
     } = req.body;
     try {        
-        const missingFields = getMissingFields(req.body, ['trainingPlanId', 'name', 'description', 'days_per_week', 'is_current_plan']);
+        const missingFields = getMissingFields(req.body, ['planId', 'name', 'description', 'days_per_week', 'is_current_plan']);
         if (missingFields.length > 0) {
             throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
         };
 
-        const planExist = await TrainingPlans.checkIfPlanExist(trainingPlanId);
+        const planExist = await TrainingPlans.checkIfPlanExist(planId);
         if (!planExist) {
             throw new ApiError(404, `Training plan with id ${day_id} not found`);
         }
@@ -114,7 +114,7 @@ export async function updateTrainingPlan(req, res, next) {
         // If new plan is current delete other current plans
         if (is_current_plan) await TrainingPlans.deleteAllCurrentTrainingPlans(id);
 
-        const result = await TrainingPlans.updateTrainingPlan(trainingPlanId, name, description, days_per_week, thumbnail_image, is_current_plan)
+        const result = await TrainingPlans.updateTrainingPlan(planId, name, description, days_per_week, thumbnail_image, is_current_plan)
         if (!result) {
             throw new ApiError(500, 'Training plan has not been updated');
         };

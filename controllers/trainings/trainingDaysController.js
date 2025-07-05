@@ -45,25 +45,25 @@ export async function getTrainingDayData(req, res, next) {
 }
 
 export async function addTrainingDayToTrainingPlan(req, res, next) {
-    const trainingPlanId = Number(req.body.trainingPlanId);
-    const { dayName, dayDescription } = req.body;
+    const planId = Number(req.body.planId);
+    const { name, description } = req.body;
     try {
-        const missingFields = getMissingFields(req.body, ['trainingPlanId', 'dayName']);
+        const missingFields = getMissingFields(req.body, ['planId', 'name']);
         if (missingFields.length > 0) {
             throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
         };
 
-        const planExist = await TrainingPlans.checkIfPlanExist(trainingPlanId);
+        const planExist = await TrainingPlans.checkIfPlanExist(planId);
         if (!planExist) {
-            throw new ApiError(404, `Plan with id ${trainingPlanId} not found`);
+            throw new ApiError(404, `Plan with id ${planId} not found`);
         }
 
-        const insertedDayId = await TrainingDays.addNewTrainingDayToTrainingPlan(trainingPlanId, dayName, dayDescription, 1); // 1 is to order list
+        const insertedDayId = await TrainingDays.addNewTrainingDayToTrainingPlan(planId, name, description, 1); // 1 is to order list
         if (!insertedDayId) {
             throw new ApiError(500, `Training day has not been added`);
         };
 
-        return ApiSuccess(res, 201, { trainingPlanId, trainingDayId: insertedDayId }, 'Training day has been added');
+        return ApiSuccess(res, 201, { planId, trainingDayId: insertedDayId }, 'Training day has been added');
     } catch (error) {
         next(error);
     }
@@ -71,9 +71,9 @@ export async function addTrainingDayToTrainingPlan(req, res, next) {
 
 export async function updateTrainignDay(req, res, next) {
     const day_id = Number(req.body.day_id)
-    const { dayName, dayDescription } = req.body;
+    const { name, description } = req.body;
     try {
-        const missingFields = getMissingFields(req.body, ['day_id', 'dayName']);
+        const missingFields = getMissingFields(req.body, ['day_id', 'name']);
         if (missingFields.length > 0) {
             throw new ApiError(400, `Missing required fields: ${missingFields.join(', ')}`);
         };
@@ -83,7 +83,7 @@ export async function updateTrainignDay(req, res, next) {
             throw new ApiError(404, `Day with id ${day_id} not found`);
         }
 
-        const result = await TrainingDays.updateTrainingDayInTrainingPlan(day_id, dayName, dayDescription, 1); // 1 is to order list
+        const result = await TrainingDays.updateTrainingDayInTrainingPlan(day_id, name, description, 1); // 1 is to order list
         if (!result) {
             throw new ApiError(500, `Training day has not been updated`);
         };

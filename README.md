@@ -22,5 +22,7 @@ Node.js · Express · PostgreSQL · JWT · REST API
 
 Copy `.env.example` to `.env` and fill in your values, then:
 
+```bash
 npm install
 node server.js
+```
